@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Citizen;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Incident;
 use Illuminate\Http\Request;
@@ -11,34 +10,34 @@ use Illuminate\Support\Facades\Auth;
 class CommentController extends Controller
 {
     /**
-     * Store a newly created comment in storage.
+     * Store a new comment
      */
     public function store(Request $request, Incident $incident)
     {
-        $validated = $request->validate([
-            'content' => 'required|string|max:1000',
+        $request->validate([
+            'content' => 'required|string|max:2000',
         ]);
 
-        $comment = new Comment([
-            'content' => $validated['content'],
+        $comment = Comment::create([
+            'incident_id' => $incident->id,
             'user_id' => Auth::id(),
+            'content' => $request->content
         ]);
 
-        $incident->comments()->save($comment);
-        
-        // Load the user relationship for the response
-        $comment->load('user');
+        return back()->with('success', 'Commentaire ajouté avec succès');
+    }
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'comment' => $comment,
-                'message' => 'Comment added successfully!'
-            ]);
+    /**
+     * Delete a comment
+     */
+    public function destroy(Comment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            abort(403); // Forbidden
         }
 
-        return redirect()
-            ->route('citizen.incidents.show', $incident)
-            ->with('success', 'Comment added successfully!');
+        $comment->delete();
+
+        return back()->with('success', 'Commentaire supprimé');
     }
 }

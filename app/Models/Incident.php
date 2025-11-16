@@ -3,26 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Incident extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'citizen_id',
+        'user_id',
+        'category_id',
+
         'title',
         'description',
-        'category_id',
-        'location',
-        'latitude',
-        'longitude',
-        'status_id',
-        'votes_count'
-    ];
 
-    protected $attributes = [
-        'status' => 'received',
-        'votes_count' => 0,
+        'city',
+        'address_line1',
+        'postal_code',
+        'country',
+
+        'status_id',
     ];
 
     protected $casts = [
@@ -30,21 +31,23 @@ class Incident extends Model
         'longitude' => 'float',
     ];
 
+    /* RELATIONS */
+
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'citizen_id');
+        return $this->belongsTo(User::class);
     }
-    
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
-    
+
     public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class);
     }
-    
+
     public function images(): HasMany
     {
         return $this->hasMany(IncidentImage::class);
@@ -54,14 +57,16 @@ class Incident extends Model
     {
         return $this->hasMany(Comment::class);
     }
-
+    
     public function votes(): HasMany
     {
         return $this->hasMany(Vote::class);
     }
-
+    
     public function hasVotedBy(User $user): bool
     {
-        return $this->votes()->where('citizen_id', $user->id)->exists();
+        return $this->votes()->where('user_id', $user->id)->exists();
     }
+
+
 }

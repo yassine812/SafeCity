@@ -3,16 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class IncidentImage extends Model
 {
-    protected $fillable = [
-        'incident_id',
-        'path',
-    ];
+    protected $fillable = ['incident_id', 'path'];
 
-    public function incident(): BelongsTo
+    public function incident()
     {
         return $this->belongsTo(Incident::class);
     }

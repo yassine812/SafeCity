@@ -15,11 +15,13 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $incidents = Incident::with(['type', 'user', 'votes'])
+        $incidents = Incident::with(['user', 'category', 'status', 'votes'])
             ->withCount('votes')
             ->latest()
             ->paginate(10);
             
-        return view('citizen.dashboard', compact('incidents'));
+        $categories = \App\Models\Category::all();
+            
+        return view('citizen.dashboard', compact('incidents', 'categories'));
     }
 }

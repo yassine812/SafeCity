@@ -22,13 +22,6 @@
             --sidebar-hover: #334155;
         }
 
-        /* Make sure truly hidden elements don't block clicks */
-        .hidden {
-            display: none !important;
-            pointer-events: none !important;
-            visibility: hidden !important;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -129,19 +122,6 @@
         
         ::-webkit-scrollbar-thumb:hover {
             background: #ec4899;
-        }
-
-        /* Ensure dropzone sits above possible overlays */
-        #dropzone {
-            position: relative;
-            z-index: 9999;
-            cursor: pointer;
-        }
-
-        /* If you ever use a modal overlay, hide it fully when not active */
-        .modal-overlay.hidden {
-            display: none !important;
-            pointer-events: none !important;
         }
     </style>
 </head>
@@ -295,6 +275,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                     </div>
 
+
                     <!-- Description -->
                     <div class="space-y-2">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description détaillée <span class="text-pink-500">*</span></label>
@@ -360,11 +341,11 @@ unset($__errorArgs, $__bag); ?>
                     
                     <!-- Adresse -->
                     <div class="space-y-2">
-                        <label for="address" class="block text-sm font-medium text-gray-700">Adresse <span class="text-pink-500">*</span></label>
-                        <input type="text" name="address" id="address" value="<?php echo e(old('address')); ?>" required 
+                        <label for="address_line1" class="block text-sm font-medium text-gray-700">Adresse <span class="text-pink-500">*</span></label>
+                        <input type="text" name="address_line1" id="address_line1" value="<?php echo e(old('address_line1')); ?>" required 
                             class="block w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm" 
                             placeholder="Adresse complète">
-                        <?php $__errorArgs = ['address'];
+                        <?php $__errorArgs = ['address_line1'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -394,10 +375,8 @@ endif;
 unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    <!-- Location fields (hidden, using default values) -->
-                    <input type="hidden" id="location" name="location" value="Casablanca, Maroc">
-                    <input type="hidden" id="latitude" name="latitude" value="33.5731">
-                    <input type="hidden" id="longitude" name="longitude" value="-7.5898">
+                    <!-- Hidden country field with default value -->
+                    <input type="hidden" name="country" value="Tunisia">
 
                     <!-- File Upload Dropzone -->
                     <div class="mb-6">
@@ -414,7 +393,8 @@ unset($__errorArgs, $__bag); ?>
                             class="hidden"
                         />
 
-                        <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 transition-colors duration-200">
+                        <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-pink-400 transition-colors duration-200"
+                             onclick="document.getElementById('mediaInput').click()">
                             <div class="space-y-2">
                                 <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
                                 <p class="text-sm text-gray-600">Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
@@ -460,9 +440,14 @@ unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </form>
-        
         </div>
     </div>
+</div>
+
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
     // Toggle sidebar on mobile
@@ -491,12 +476,11 @@ unset($__errorArgs, $__bag); ?>
     });
 </script>
 
-<?php $__env->startPush('scripts'); ?>
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Map Modal Elements (defensive: may not be present)
+        // Map Modal Elements
         const mapModal = document.getElementById('mapModal');
         const openMapModal = document.getElementById('openMapModal');
         const closeMapModal = document.getElementById('closeMapModal');
@@ -507,29 +491,19 @@ unset($__errorArgs, $__bag); ?>
         const longitudeInput = document.getElementById('longitude');
         const selectedLocationText = document.getElementById('selectedLocationText');
 
-        // Ensure hidden modal does not intercept clicks
-        if (mapModal && mapModal.classList.contains('hidden')) {
-            mapModal.style.display = 'none';
-            mapModal.style.pointerEvents = 'none';
-        }
-
         let map, marker;
 
-        // Function to update location inputs and text
-        function updateLocationDisplay(lat, lng, address) {
-            if (latitudeInput) latitudeInput.value = lat.toFixed(6);
-            if (longitudeInput) longitudeInput.value = lng.toFixed(6);
-            if (locationInput) locationInput.value = address;
-            if (selectedLocationText) selectedLocationText.innerText = address;
-        }
+        if (mapModal && openMapModal && closeMapModal && cancelLocation && confirmLocation && selectedLocationText && locationInput && latitudeInput && longitudeInput) {
+            // Function to update location inputs and text
+            function updateLocationDisplay(lat, lng, address) {
+                latitudeInput.value = lat.toFixed(6);
+                longitudeInput.value = lng.toFixed(6);
+                locationInput.value = address;
+                selectedLocationText.innerText = address;
+            }
 
-        if (openMapModal) {
             openMapModal.addEventListener('click', function() {
-                if (mapModal) {
-                    mapModal.classList.remove('hidden');
-                    mapModal.style.display = 'block';
-                    mapModal.style.pointerEvents = 'auto';
-                }
+                mapModal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
                 if (!map) {
                     initMap();
@@ -537,25 +511,20 @@ unset($__errorArgs, $__bag); ?>
                     map.invalidateSize();
                 }
             });
-        }
 
-        function closeModal() {
-            if (mapModal) {
+            function closeModal() {
                 mapModal.classList.add('hidden');
-                mapModal.style.display = 'none';
-                mapModal.style.pointerEvents = 'none';
+                document.body.style.overflow = 'auto';
             }
-            document.body.style.overflow = 'auto';
-        }
 
-        if (closeMapModal) closeMapModal.addEventListener('click', closeModal);
-        if (cancelLocation) cancelLocation.addEventListener('click', closeModal);
+            closeMapModal.addEventListener('click', closeModal);
+            cancelLocation.addEventListener('click', closeModal);
 
-        function initMap() {
+            function initMap() {
             const defaultLat = 33.5731;
             const defaultLng = -7.5898;
-            const initialLat = latitudeInput && latitudeInput.value && latitudeInput.value !== '0' ? parseFloat(latitudeInput.value) : defaultLat;
-            const initialLng = longitudeInput && longitudeInput.value && longitudeInput.value !== '0' ? parseFloat(longitudeInput.value) : defaultLng;
+            const initialLat = latitudeInput.value && latitudeInput.value !== '0' ? parseFloat(latitudeInput.value) : defaultLat;
+            const initialLng = longitudeInput.value && longitudeInput.value !== '0' ? parseFloat(longitudeInput.value) : defaultLng;
 
             map = L.map('map').setView([initialLat, initialLng], 13);
 
@@ -584,7 +553,7 @@ unset($__errorArgs, $__bag); ?>
             });
         }
 
-        function reverseGeocode(lat, lng) {
+            function reverseGeocode(lat, lng) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=fr`)
                 .then(response => response.json())
                 .then(data => {
@@ -598,138 +567,222 @@ unset($__errorArgs, $__bag); ?>
                 });
         }
 
-        if (confirmLocation) {
             confirmLocation.addEventListener('click', function() {
-                if (marker) {
-                    const position = marker.getLatLng();
-                    reverseGeocode(position.lat, position.lng);
-                    const status = document.getElementById('locationStatus');
-                    if (status) status.textContent = 'Localisation mise à jour';
-                } else if (map) {
-                    const center = map.getCenter();
-                    reverseGeocode(center.lat, center.lng);
-                    const status = document.getElementById('locationStatus');
-                    if (status) status.textContent = 'Localisation mise à jour';
-                }
-                closeModal();
-            });
+            if (marker) {
+                const position = marker.getLatLng();
+                reverseGeocode(position.lat, position.lng);
+                document.getElementById('locationStatus').textContent = 'Localisation mise à jour';
+            } else {
+                // If no marker is placed, use the center of the map
+                const center = map.getCenter();
+                reverseGeocode(center.lat, center.lng);
+                document.getElementById('locationStatus').textContent = 'Localisation mise à jour';
+            }
+            closeModal();
+        });
         }
 
-        // ---------------------------
-        // MEDIA UPLOAD WITH PREVIEW
-        // ---------------------------
+        // Media Upload with Preview
         const mediaInput = document.getElementById("mediaInput");
         const mediaPreview = document.getElementById("mediaPreview");
+        const fileCounter = document.getElementById("fileCounter");
         const dropzone = document.getElementById("dropzone");
-        const MAX_FILES = 5;
-        const MAX_SIZE = 20 * 1024 * 1024; // 20MB
 
-        // Restore files from localStorage on page load
-        (function restoreFiles() {
-            const savedFiles = localStorage.getItem('savedFiles');
-            if (!savedFiles) return;
-            try {
-                const parsed = JSON.parse(savedFiles);
-                if (!Array.isArray(parsed) || parsed.length === 0) return;
-
-                const dt = new DataTransfer();
-                // Recreate File objects from base64
-                parsed.forEach(fileInfo => {
-                    const byteString = atob(fileInfo.data);
-                    const ab = new ArrayBuffer(byteString.length);
-                    const ia = new Uint8Array(ab);
-                    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-                    const blob = new Blob([ab], { type: fileInfo.type });
-                    const file = new File([blob], fileInfo.name, { type: fileInfo.type });
-                    dt.items.add(file);
-                });
-
-                mediaInput.files = dt.files;
-                updateMediaPreview();
-            } catch (e) {
-                console.error('Error restoring files:', e);
-                localStorage.removeItem('savedFiles');
-            }
-        })();
-
-        // Utility: merge an incoming FileList/Array with existing mediaInput.files
-        function mergeFiles(newFiles) {
-            const dt = new DataTransfer();
-            // add existing files first
-            Array.from(mediaInput.files || []).forEach(f => dt.items.add(f));
-            // add new files, avoid duplicates, respect MAX_FILES
-            Array.from(newFiles).forEach(f => {
-                const isDuplicate = Array.from(dt.files).some(existing => existing.name === f.name && existing.size === f.size);
-                if (!isDuplicate && dt.files.length < MAX_FILES) {
-                    dt.items.add(f);
-                }
-            });
-            mediaInput.files = dt.files;
+        if (dropzone) {
+            dropzone.addEventListener('dragover', handleDragOver);
+            dropzone.addEventListener('dragleave', handleDragLeave);
+            dropzone.addEventListener('drop', handleDrop);
         }
 
-        // Save files to localStorage (store as base64 for persistence)
+        // Restore files from localStorage on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedFiles = localStorage.getItem('savedFiles');
+            if (savedFiles) {
+                try {
+                    const files = JSON.parse(savedFiles);
+                    if (files && files.length > 0) {
+                        const dataTransfer = new DataTransfer();
+                        
+                        // Create a mock FileList using DataTransfer
+                        files.forEach(fileInfo => {
+                            const file = new File(
+                                [fileInfo.data],
+                                fileInfo.name,
+                                { type: fileInfo.type }
+                            );
+                            dataTransfer.items.add(file);
+                        });
+                        
+                        mediaInput.files = dataTransfer.files;
+                        updateMediaPreview();
+                    }
+                } catch (e) {
+                    console.error('Error restoring files:', e);
+                    localStorage.removeItem('savedFiles');
+                }
+            }
+        });
+
+        mediaInput.addEventListener("change", () => {
+            updateMediaPreview();
+        });
+
+        // Handle drag over
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.add('border-pink-500', 'bg-pink-50');
+        }
+
+        // Handle drag leave
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('border-pink-500', 'bg-pink-50');
+        }
+
+        // Handle file drop
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('border-pink-500', 'bg-pink-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+                // Update the file input with the dropped files
+                updateFileInput(files);
+            }
+        }
+
+        // Handle file selection
+        mediaInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFiles(this.files);
+                // Update the file input with the new files
+                updateFileInput(this.files);
+            }
+        });
+        
+        // Function to update the file input with selected files
+        function updateFileInput(files) {
+            const dataTransfer = new DataTransfer();
+            Array.from(files).forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            mediaInput.files = dataTransfer.files;
+        }
+
+        // Save files to localStorage
         function saveFilesToStorage() {
             const files = Array.from(mediaInput.files || []);
+            const filesToSave = [];
+            
+            // Convert files to base64 for storage
             const filePromises = files.map(file => {
                 return new Promise((resolve) => {
                     const reader = new FileReader();
-                    reader.onload = e => {
-                        resolve({
+                    reader.onload = (e) => {
+                        filesToSave.push({
                             name: file.name,
                             type: file.type,
                             size: file.size,
-                            data: e.target.result.split(',')[1]
+                            data: e.target.result.split(',')[1] // Remove data URL prefix
                         });
+                        resolve();
                     };
                     reader.readAsDataURL(file);
                 });
             });
-
-            Promise.all(filePromises).then(results => {
-                localStorage.setItem('savedFiles', JSON.stringify(results));
-            }).catch(err => {
-                console.error('Error saving files:', err);
+            
+            Promise.all(filePromises).then(() => {
+                localStorage.setItem('savedFiles', JSON.stringify(filesToSave));
             });
         }
-
-        // File validation & handling wrapper
+        
+        // Process selected files
         function handleFiles(files) {
+            const MAX_FILES = 5;
+            const validFiles = [];
             const invalidFiles = [];
-            const accepted = [];
-
+            
+            // Get existing files
+            const existingFiles = Array.from(mediaInput.files || []);
+            
+            // Check total file count
+            if (existingFiles.length + files.length > MAX_FILES) {
+                alert(`Vous ne pouvez téléverser que ${MAX_FILES} fichiers au maximum.`);
+                return;
+            }
+            
+            // Process each file
             Array.from(files).forEach(file => {
                 const fileType = file.type.split('/')[0];
-                if (!['image', 'video'].includes(fileType) || file.size > MAX_SIZE) {
+                const validTypes = ['image', 'video'];
+                
+                if (validTypes.includes(fileType) && file.size <= 20 * 1024 * 1024) { // 20MB max
+                    // Check for duplicate files
+                    const isDuplicate = existingFiles.some(
+                        existingFile => existingFile.name === file.name && existingFile.size === file.size
+                    );
+                    
+                    if (!isDuplicate) {
+                        validFiles.push(file);
+                    }
+                } else {
                     invalidFiles.push(file.name);
-                    return;
                 }
-                accepted.push(file);
             });
-
-            if (invalidFiles.length) {
-                showFileErrors([`Les fichiers suivants n'ont pas été acceptés :\n${invalidFiles.join(', ')}. Veuillez vérifier le type/taille (<=20MB).`]);
+            
+            // Show error for invalid files
+            if (invalidFiles.length > 0) {
+                alert(`Les fichiers suivants n'ont pas été acceptés :\n${invalidFiles.join('\n')}\n\nAssurez-vous que les fichiers sont des images ou des vidéos et ne dépassent pas 20Mo.`);
             }
-
-            const existingCount = (mediaInput.files && mediaInput.files.length) || 0;
-            const remaining = Math.max(0, MAX_FILES - existingCount);
-            if (accepted.length > remaining) {
-                showFileErrors([`Vous ne pouvez téléverser que ${MAX_FILES} fichiers au total.`]);
+            
+            // Check total file count
+            const currentFiles = mediaInput.files ? Array.from(mediaInput.files) : [];
+            const totalFiles = currentFiles.length + validFiles.length;
+            
+            if (totalFiles > MAX_FILES) {
+                invalidFiles.push(`Vous ne pouvez pas sélectionner plus de ${MAX_FILES} fichiers au total`);
+            } else {
+                // Add valid files to the input
+                const dt = new DataTransfer();
+                
+                // Add existing files
+                currentFiles.forEach(file => dt.items.add(file));
+                
+                // Add new valid files (up to the limit)
+                const remainingSlots = MAX_FILES - currentFiles.length;
+                validFiles.slice(0, remainingSlots).forEach(file => dt.items.add(file));
+                
+                mediaInput.files = dt.files;
             }
-            mergeFiles(accepted.slice(0, remaining));
+            
+            // Show error messages if any
+            if (invalidFiles.length > 0) {
+                showFileErrors(invalidFiles);
+            }
+            
+            // Update preview and save to storage
             updateMediaPreview();
             saveFilesToStorage();
         }
-
+        
         // Show file validation errors
         function showFileErrors(errors) {
-            const existingErrors = document.querySelectorAll('.file-upload-error');
-            existingErrors.forEach(el => el.remove());
             const errorHtml = errors.map(error => 
-                `<div class="p-3 mb-2 bg-red-50 text-red-700 text-sm rounded-lg flex items-start file-upload-error">
+                `<div class="p-3 mb-2 bg-red-50 text-red-700 text-sm rounded-lg flex items-start">
                     <i class="fas fa-exclamation-circle mt-0.5 mr-2"></i>
                     <span>${error}</span>
                 </div>`
             ).join('');
+            
+            // Remove any existing error messages
+            const existingErrors = document.querySelectorAll('.file-upload-error');
+            existingErrors.forEach(el => el.remove());
+            
+            // Add new error messages
             if (errors.length > 0) {
                 const errorContainer = document.createElement('div');
                 errorContainer.className = 'file-upload-error mt-3';
@@ -742,12 +795,43 @@ unset($__errorArgs, $__bag); ?>
         function updateMediaPreview() {
             mediaPreview.innerHTML = "";
             const files = Array.from(mediaInput.files || []);
-            if (files.length === 0) return;
+            
+            if (files.length === 0) {
+                // Check if we have saved files in localStorage
+                const savedFiles = localStorage.getItem('savedFiles');
+                if (savedFiles) {
+                    try {
+                        const parsedFiles = JSON.parse(savedFiles);
+                        if (parsedFiles && parsedFiles.length > 0) {
+                            // If we have saved files but no files in the input,
+                            // it means the page was just loaded and we need to restore the preview
+                            const dataTransfer = new DataTransfer();
+                            parsedFiles.forEach(fileInfo => {
+                                const file = new File(
+                                    [fileInfo.data],
+                                    fileInfo.name,
+                                    { type: fileInfo.type }
+                                );
+                                dataTransfer.items.add(file);
+                            });
+                            mediaInput.files = dataTransfer.files;
+                            files.push(...Array.from(dataTransfer.files));
+                        }
+                    } catch (e) {
+                        console.error('Error restoring files:', e);
+                        localStorage.removeItem('savedFiles');
+                    }
+                }
+                
+                if (files.length === 0) {
+                    return;
+                }
+            }
 
             files.forEach((file, index) => {
                 const previewItem = document.createElement("div");
                 previewItem.className = "relative group rounded-lg overflow-hidden border-2 border-gray-200 hover:border-pink-300 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1";
-
+                
                 // Remove button
                 const removeBtn = document.createElement("button");
                 removeBtn.innerHTML = "<i class='fas fa-times text-sm'></i>";
@@ -828,46 +912,8 @@ unset($__errorArgs, $__bag); ?>
                 localStorage.removeItem('savedFiles');
             }
         }
-
-        // Wire file input change
-        if (mediaInput) {
-            mediaInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    handleFiles(this.files);
-                }
-            });
-        }
-
-        // Wire dropzone drag/drop events (no inline handlers required)
-        if (dropzone) {
-            dropzone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.add('border-pink-500', 'bg-pink-50');
-            });
-            dropzone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.remove('border-pink-500', 'bg-pink-50');
-            });
-            dropzone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.remove('border-pink-500', 'bg-pink-50');
-                const files = e.dataTransfer.files;
-                if (files && files.length > 0) {
-                    handleFiles(files);
-                }
-            });
-            // Allow clicking the dropzone to open file picker (defensive check)
-            dropzone.addEventListener('click', () => {
-                if (mediaInput) mediaInput.click();
-            });
-        }
-
     });
 </script>
-<?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('styles'); ?>
 <style>

@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
     {
         // Exécution des seeders
         $this->call([
-            StatusSeeder::class,    // Doit être exécuté avant CategorySeeder
-            CategorySeeder::class,  // Seed les catégories
+            // Doit être exécuté avant CategorySeeder
+            CategoriesSeeder::class,
             AdminUserSeeder::class, // Seed l'utilisateur admin
         ]);
     }

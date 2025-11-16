@@ -263,168 +263,176 @@
                 </a>
             </div>
 
-            <!-- FEED TITLE -->
-            <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                Incidents dans votre ville
-            </h2>
+            <!-- Incident Feed Section -->
+            <div class="mt-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6">Derniers signalements</h2>
+                <div class="space-y-6">
+                    <?php $__empty_1 = true; $__currentLoopData = $incidents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $incident): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <!-- Enhanced Post Card with Vote + Comment -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-pink-50 hover:shadow-2xl transition-all duration-300" id="post-<?php echo e($incident->id); ?>">
+                        <!-- Header -->
+                        <div class="p-5 flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 flex items-center justify-center text-white font-semibold shadow-md">
+                                <?php echo e(strtoupper(substr($incident->user->name, 0, 1))); ?>
 
-            <!-- INCIDENT FEED -->
-            <div class="space-y-6">
-                <?php $__empty_1 = true; $__currentLoopData = $incidents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $incident): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <div class="feed-card">
-                        <!-- HEADER USER + DATE -->
-                        <div class="flex items-center mb-3">
-                            <img src="<?php echo e(auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://ui-avatars.com/api/?name='.auth()->user()->name); ?>"
-                                 class="w-10 h-10 rounded-full object-cover">
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="font-semibold text-gray-900 text-sm"><?php echo e($incident->user->name); ?></h3>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <span><?php echo e($incident->created_at->diffForHumans()); ?></span>
+                                    <span class="mx-1">•</span>
+                                    <i class="fas fa-map-marker-alt text-pink-400"></i>
+                                </div>
+                            </div>
+                            <div class="ml-auto">
+                                <?php
+                                    $statusSlug = $incident->status->slug ?? strtolower($incident->status ?? '');
+                                    $statusName = $incident->status->name ?? $incident->status ?? 'N/A';
+                                    
+                                    $statusClasses = [
+                                        'nouveau' => 'bg-blue-100 text-blue-800',
+                                        'en_attente' => 'bg-yellow-100 text-yellow-800',
+                                        'en_cours' => 'bg-blue-100 text-blue-800',
+                                        'resolu' => 'bg-green-100 text-green-800',
+                                        'ferme' => 'bg-gray-100 text-gray-800'
+                                    ];
+                                    
+                                    $statusClass = $statusClasses[strtolower($statusSlug)] ?? 'bg-gray-100 text-gray-800';
+                                ?>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium <?php echo e($statusClass); ?> shadow-sm">
+                                    <?php echo e(ucwords(str_replace('_', ' ', $statusName))); ?>
 
-                            <div class="ml-3">
-                                <p class="font-semibold text-gray-800"><?php echo e($incident->user->name ?? 'Utilisateur inconnu'); ?></p>
-                                <p class="text-xs text-gray-500"><?php echo e($incident->created_at->diffForHumans()); ?></p>
+                                </span>
                             </div>
                         </div>
 
-                        <!-- INCIDENT TYPE + STATUS -->
-                        <div class="mb-3 flex items-center justify-between">
-                            <span class="font-bold text-gray-700 text-lg">
-                                <?php echo e($incident->type->name ?? 'Type inconnu'); ?>
-
-                            </span>
-
-                            <!-- Status -->
-                            <span class="status-badge 
-                                <?php if($incident->status=='recu'): ?> bg-blue-100 text-blue-600
-                                <?php elseif($incident->status=='en_cours'): ?> bg-yellow-100 text-yellow-700
-                                <?php else: ?> bg-green-100 text-green-700 <?php endif; ?>">
-                                <?php echo e(ucfirst(str_replace('_', ' ', $incident->status))); ?>
-
-                            </span>
+                        <!-- Content -->
+                        <div class="px-5 pb-4">
+                            <h2 class="text-lg font-semibold text-gray-900 mb-2"><?php echo e($incident->title); ?></h2>
+                            <p class="text-gray-700 text-sm leading-relaxed"><?php echo e($incident->description); ?></p>
                         </div>
 
-                        <!-- DESCRIPTION -->
-                        <p class="text-gray-700 mb-3">
-                            <?php echo e($incident->description); ?>
+                        <!-- Location -->
+                        <?php
+                            $address1 = $incident->address_line1;
+                            $address2 = $incident->address_line2;
+                            $city = $incident->city;
+                            $postalCode = $incident->postal_code;
+                        ?>
+                        <?php if($address1 || $address2 || $city || $postalCode): ?>
+                        <div class="px-5 pb-4">
+                            <div class="flex items-start text-sm">
+                                <i class="fas fa-map-marker-alt mt-1 mr-2 text-pink-500"></i>
+                                <div class="space-y-1">
+                                    <?php if($address1): ?>
+                                        <div class="font-medium text-gray-900"><?php echo e($address1); ?></div>
+                                        <?php if($address2): ?>
+                                            <div class="text-gray-700"><?php echo e($address2); ?></div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <?php if($city || $postalCode): ?>
+                                    <div class="flex flex-wrap items-center gap-x-3 text-gray-600 mt-1">
+                                        <?php if($city): ?>
+                                            <span class="inline-flex items-center">
+                                                <i class="fas fa-city mr-1 text-pink-400"></i>
+                                                <?php echo e($city); ?>
 
-                        </p>
+                                            </span>
+                                        <?php endif; ?>
+                                        <?php if($postalCode): ?>
+                                            <span class="inline-flex items-center">
+                                                <i class="fas fa-mailbox mr-1 text-pink-400"></i>
+                                                <?php echo e($postalCode); ?>
 
-                        <!-- MEDIA (IMAGES) -->
-                        <?php if($incident->media && is_array($incident->media) && count($incident->media) > 0): ?>
-                            <div class="grid grid-cols-2 gap-3 mb-4">
-                                <?php $__currentLoopData = $incident->media; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <img src="<?php echo e(asset('storage/'.$img)); ?>" class="rounded-lg w-full h-48 object-cover shadow">
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Media Section -->
+                        <?php if($incident->images->isNotEmpty()): ?>
+                        <div class="grid grid-cols-<?php echo e($incident->images->count() > 1 ? '2' : '1'); ?> gap-1">
+                            <?php $__currentLoopData = $incident->images->take(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="relative group">
+                                <img src="<?php echo e(asset('storage/'.$image->path)); ?>" class="w-full h-56 object-cover group-hover:brightness-75 transition" />
+                                <?php if($loop->last && $incident->images->count() > 4): ?>
+                                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-xl font-bold">
+                                    +<?php echo e($incident->images->count() - 4); ?>
+
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Vote & Comment Buttons -->
+                        <div class="flex justify-around items-center py-3 border-t bg-gray-50 text-sm text-gray-600">
+                            <!-- Vote Button -->
+                            <button onclick="vote(<?php echo e($incident->id); ?>)" id="vote-btn-<?php echo e($incident->id); ?>" class="flex items-center space-x-1 hover:text-pink-500 transition">
+                                <i class="far fa-thumbs-up"></i>
+                                <span id="votes-count-<?php echo e($incident->id); ?>"><?php echo e($incident->votes_count ?? 0); ?></span>
+                            </button>
+
+                            <!-- Toggle Comments -->
+                            <button onclick="toggleComments(<?php echo e($incident->id); ?>)" class="flex items-center space-x-1 hover:text-pink-500 transition">
+                                <i class="far fa-comment"></i><span>Commentaires</span>
+                            </button>
+                        </div>
+
+                        <!-- Comment Section -->
+                        <div id="comments-<?php echo e($incident->id); ?>" class="hidden border-t bg-gray-50 p-4">
+                            <!-- Comment Input -->
+                            <div class="flex items-center mb-4">
+                                <input id="comment-input-<?php echo e($incident->id); ?>" type="text" placeholder="Écrire un commentaire..." class="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <button onclick="sendComment(<?php echo e($incident->id); ?>)" class="ml-2 text-pink-500 hover:text-pink-600">
+                                    <i class="far fa-paper-plane"></i>
+                                </button>
+                            </div>
+
+                            <!-- Comments List -->
+                            <div id="comment-list-<?php echo e($incident->id); ?>" class="space-y-3">
+                                <?php $__currentLoopData = $incident->comments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $comment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="bg-white p-3 rounded-lg shadow-sm text-sm">
+                                    <span class="font-semibold"><?php echo e($comment->user->name); ?></span>
+                                    <p class="text-gray-700"><?php echo e($comment->content); ?></p>
+                                </div>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
-                        <?php endif; ?>
-
-                        <!-- LOCATION -->
-                        <?php if($incident->address): ?>
-                            <p class="text-sm text-gray-500 mb-4 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <?php echo e($incident->address); ?>
-
-                            </p>
-                        <?php endif; ?>
-
-                        <!-- ACTIONS -->
-                        <div class="flex items-center justify-between mt-4 border-t pt-3">
-                            <!-- VOTE -->
-                            <form action="<?php echo e(route('citizen.incidents.vote', $incident->id)); ?>" method="POST">
-                                <?php echo csrf_field(); ?>
-                                <button type="submit" class="text-gray-600 hover:text-pink-500 font-medium flex items-center transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                    </svg>
-                                    <span>Confirmer (<?php echo e($incident->votes_count ?? 0); ?>)</span>
-                                </button>
-                            </form>
-
-                            <!-- COMMENTS -->
-                            <a href="<?php echo e(route('citizen.incidents.show', $incident->id)); ?>"
-                               class="text-gray-600 hover:text-pink-500 font-medium flex items-center transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                                <span>Commentaires</span>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <div class="text-center py-12 bg-white rounded-lg shadow">
+                            <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">Aucun incident signalé pour le moment</p>
+                            <a href="<?php echo e(route('citizen.incidents.create')); ?>" class="mt-4 inline-block btn-primary">
+                                Signaler un incident
                             </a>
                         </div>
-                    </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <div class="text-center py-12 px-4">
-                        <div class="max-w-md mx-auto">
-                            <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun incident signalé</h3>
-                            <p class="mt-1 text-gray-500">Soyez le premier à signaler un incident dans votre quartier !</p>
-                            <div class="mt-6">
-                                <a href="<?php echo e(route('citizen.incidents.create')); ?>" class="btn-primary">
-                                    Signaler un incident
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- PAGINATION -->
-                <?php if($incidents->hasPages()): ?>
-                    <div class="mt-8 flex justify-center">
-                        <div class="flex space-x-1">
-                            <?php echo e($incidents->links()); ?>
-
-                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Load More Button -->
+                <?php if($incidents->hasMorePages()): ?>
+                    <div class="mt-6 text-center">
+                        <button class="px-6 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+                            Voir plus de signalements
+                        </button>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
-
-        <!-- Custom styles for pagination -->
-        <style>
-            .pagination {
-                display: flex;
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-            .page-item {
-                margin: 0 4px;
-            }
-            .page-link {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                color: var(--muted);
-                font-weight: 500;
-                text-decoration: none;
-                transition: all 0.2s;
-            }
-            .page-item.active .page-link {
-                background: linear-gradient(135deg, var(--accent), #ff5ca1);
-                color: white;
-            }
-            .page-item:not(.active) .page-link:hover {
-                background-color: #f8fafc;
-                color: var(--accent);
-            }
-            .page-item.disabled .page-link {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-        </style>
     </div>
 
     <script>
         // Toggle sidebar on mobile
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('mobile-show');
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-show');
         }
 
         // Close sidebar when clicking outside on mobile
@@ -446,11 +454,94 @@
             
             navLinks.forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
-                    navLinks.forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
                 }
             });
         });
+
+        // Toggle comments section
+        function toggleComments(id) {
+            document.getElementById('comments-' + id).classList.toggle('hidden');
+        }
+
+        // Handle voting
+        function vote(id) {
+            fetch('/citizen/incidents/' + id + '/vote', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const voteBtn = document.getElementById('vote-btn-' + id);
+                    const votesCount = document.getElementById('votes-count-' + id);
+                    votesCount.innerText = data.votes_count;
+                    
+                    // Toggle active state
+                    if (data.has_voted) {
+                        voteBtn.classList.add('text-pink-500');
+                        voteBtn.classList.remove('text-gray-600');
+                    } else {
+                        voteBtn.classList.remove('text-pink-500');
+                        voteBtn.classList.add('text-gray-600');
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Handle sending comments
+        function sendComment(id) {
+            const input = document.getElementById('comment-input-' + id);
+            const content = input.value.trim();
+            
+            if (!content) return;
+
+            fetch('/citizen/incidents/' + id + '/comment', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const commentList = document.getElementById('comment-list-' + id);
+                    const newComment = document.createElement('div');
+                    newComment.className = 'bg-white p-3 rounded-lg shadow-sm text-sm';
+                    newComment.innerHTML = `
+                        <span class="font-semibold">${data.comment.user_name}</span>
+                        <p class="text-gray-700">${data.comment.content}</p>
+                        <div class="text-xs text-gray-400 mt-1">À l'instant</div>
+                    `;
+                    
+                    // Add the new comment at the top of the list
+                    commentList.insertBefore(newComment, commentList.firstChild);
+                    
+                    // Clear the input
+                    input.value = '';
+                    
+                    // Show a success message or update UI as needed
+                    if (commentList.children.length === 1) {
+                        // If this was the first comment, ensure the comments section is visible
+                        document.getElementById('comments-' + id).classList.remove('hidden');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors de l\'envoi du commentaire.');
+            });
+        }
     </script>
 </body>
 </html><?php /**PATH C:\Users\zerni\CascadeProjects\windsurf-project-8\SafeCity\resources\views/citizen/dashboard.blade.php ENDPATH**/ ?>

@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Vote extends Model
 {
-    protected $fillable = [
-        'incident_id',
-        'citizen_id'
+    protected $fillable = ['user_id', 'incident_id'];
+    
+    protected $casts = [
+        'type' => 'string',
     ];
 
     public function incident(): BelongsTo

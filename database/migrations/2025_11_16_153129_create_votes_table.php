@@ -11,13 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('votes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('incident_id')->constrained()->onDelete('cascade');
-            $table->foreignId('citizen_id')->constrained('users');
-            $table->unique(['incident_id', 'citizen_id']);
-            $table->timestamps();
-        });
+       Schema::create('votes', function (Blueprint $table) {
+    $table->id();
+
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->foreignId('incident_id')->constrained()->onDelete('cascade');
+
+    // Empêche double vote
+    $table->unique(['user_id', 'incident_id']);
+
+    $table->timestamps();
+});
+
     }
 
     /**

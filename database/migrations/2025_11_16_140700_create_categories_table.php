@@ -11,16 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('statuses', function (Blueprint $table) {
-            $table->id();
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id(); // UNSIGNED BIG INT
             $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('color')->default('#6B7280');
-            $table->string('icon')->nullable();
-            $table->boolean('is_default')->default(false);
-            $table->integer('order')->default(0);
+            $table->string('slug')->unique()->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('statuses');
+        Schema::dropIfExists('categories');
     }
 };

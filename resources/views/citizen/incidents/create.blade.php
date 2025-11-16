@@ -259,6 +259,7 @@
                         @enderror
                     </div>
 
+
                     <!-- Description -->
                     <div class="space-y-2">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description détaillée <span class="text-pink-500">*</span></label>
@@ -310,11 +311,11 @@
                     
                     <!-- Adresse -->
                     <div class="space-y-2">
-                        <label for="address" class="block text-sm font-medium text-gray-700">Adresse <span class="text-pink-500">*</span></label>
-                        <input type="text" name="address" id="address" value="{{ old('address') }}" required 
+                        <label for="address_line1" class="block text-sm font-medium text-gray-700">Adresse <span class="text-pink-500">*</span></label>
+                        <input type="text" name="address_line1" id="address_line1" value="{{ old('address_line1') }}" required 
                             class="block w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm" 
                             placeholder="Adresse complète">
-                        @error('address')
+                        @error('address_line1')
                             <p class="mt-1 text-sm text-pink-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -330,10 +331,8 @@
                         @enderror
                     </div>
                     
-                    <!-- Location fields (hidden, using default values) -->
-                    <input type="hidden" id="location" name="location" value="Casablanca, Maroc">
-                    <input type="hidden" id="latitude" name="latitude" value="33.5731">
-                    <input type="hidden" id="longitude" name="longitude" value="-7.5898">
+                    <!-- Hidden country field with default value -->
+                    <input type="hidden" name="country" value="Tunisia">
 
                     <!-- File Upload Dropzone -->
                     <div class="mb-6">
@@ -351,10 +350,7 @@
                         />
 
                         <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-pink-400 transition-colors duration-200"
-                             onclick="document.getElementById('mediaInput').click()"
-                             ondrop="handleDrop(event)"
-                             ondragover="handleDragOver(event)"
-                             ondragleave="handleDragLeave(event)">
+                             onclick="document.getElementById('mediaInput').click()">
                             <div class="space-y-2">
                                 <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
                                 <p class="text-sm text-gray-600">Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
@@ -422,7 +418,6 @@
     });
 </script>
 
-@push('scripts')
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script>
@@ -440,33 +435,34 @@
 
         let map, marker;
 
-        // Function to update location inputs and text
-        function updateLocationDisplay(lat, lng, address) {
-            latitudeInput.value = lat.toFixed(6);
-            longitudeInput.value = lng.toFixed(6);
-            locationInput.value = address;
-            selectedLocationText.innerText = address;
-        }
-
-        openMapModal.addEventListener('click', function() {
-            mapModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            if (!map) {
-                initMap();
-            } else {
-                map.invalidateSize();
+        if (mapModal && openMapModal && closeMapModal && cancelLocation && confirmLocation && selectedLocationText && locationInput && latitudeInput && longitudeInput) {
+            // Function to update location inputs and text
+            function updateLocationDisplay(lat, lng, address) {
+                latitudeInput.value = lat.toFixed(6);
+                longitudeInput.value = lng.toFixed(6);
+                locationInput.value = address;
+                selectedLocationText.innerText = address;
             }
-        });
 
-        function closeModal() {
-            mapModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+            openMapModal.addEventListener('click', function() {
+                mapModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                if (!map) {
+                    initMap();
+                } else {
+                    map.invalidateSize();
+                }
+            });
 
-        closeMapModal.addEventListener('click', closeModal);
-        cancelLocation.addEventListener('click', closeModal);
+            function closeModal() {
+                mapModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
 
-        function initMap() {
+            closeMapModal.addEventListener('click', closeModal);
+            cancelLocation.addEventListener('click', closeModal);
+
+            function initMap() {
             const defaultLat = 33.5731;
             const defaultLng = -7.5898;
             const initialLat = latitudeInput.value && latitudeInput.value !== '0' ? parseFloat(latitudeInput.value) : defaultLat;
@@ -499,7 +495,7 @@
             });
         }
 
-        function reverseGeocode(lat, lng) {
+            function reverseGeocode(lat, lng) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=fr`)
                 .then(response => response.json())
                 .then(data => {
@@ -513,7 +509,7 @@
                 });
         }
 
-        confirmLocation.addEventListener('click', function() {
+            confirmLocation.addEventListener('click', function() {
             if (marker) {
                 const position = marker.getLatLng();
                 reverseGeocode(position.lat, position.lng);
@@ -526,12 +522,20 @@
             }
             closeModal();
         });
+        }
 
         // Media Upload with Preview
         const mediaInput = document.getElementById("mediaInput");
         const mediaPreview = document.getElementById("mediaPreview");
         const fileCounter = document.getElementById("fileCounter");
-        
+        const dropzone = document.getElementById("dropzone");
+
+        if (dropzone) {
+            dropzone.addEventListener('dragover', handleDragOver);
+            dropzone.addEventListener('dragleave', handleDragLeave);
+            dropzone.addEventListener('drop', handleDrop);
+        }
+
         // Restore files from localStorage on page load
         document.addEventListener('DOMContentLoaded', () => {
             const savedFiles = localStorage.getItem('savedFiles');
@@ -852,7 +856,6 @@
         }
     });
 </script>
-@endpush
 
 @push('styles')
 <style>

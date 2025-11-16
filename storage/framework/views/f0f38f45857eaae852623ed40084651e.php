@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -167,14 +167,14 @@
             </div>
             
             <nav class="space-y-2">
-                <a href="{{ route('citizen.dashboard') }}" class="flex items-center px-4 py-3 text-pink-100 hover:bg-pink-900/30 rounded-lg transition-all duration-200 group">
+                <a href="<?php echo e(route('citizen.dashboard')); ?>" class="flex items-center px-4 py-3 text-pink-100 hover:bg-pink-900/30 rounded-lg transition-all duration-200 group">
                     <div class="w-6 h-6 flex items-center justify-center mr-3 rounded-full bg-pink-900/30 group-hover:bg-pink-500/30 transition-colors">
                         <i class="fas fa-home text-pink-300 text-sm"></i>
                     </div>
                     <span class="font-medium">Tableau de bord</span>
                 </a>
                 
-                <a href="{{ route('citizen.incidents.index') }}" class="flex items-center px-4 py-3 bg-gradient-to-r from-pink-500/20 to-pink-600/30 text-white rounded-lg border-l-4 border-pink-400 shadow-md">
+                <a href="<?php echo e(route('citizen.incidents.index')); ?>" class="flex items-center px-4 py-3 bg-gradient-to-r from-pink-500/20 to-pink-600/30 text-white rounded-lg border-l-4 border-pink-400 shadow-md">
                     <div class="w-6 h-6 flex items-center justify-center mr-3 rounded-full bg-pink-400/30">
                         <i class="fas fa-exclamation-triangle text-pink-100 text-sm"></i>
                     </div>
@@ -182,7 +182,7 @@
                     <span class="ml-auto w-2 h-2 bg-pink-400 rounded-full animate-pulse"></span>
                 </a>
                 
-                <a href="{{ route('citizen.incidents.create') }}" class="flex items-center px-4 py-3 text-pink-100 hover:bg-pink-900/30 rounded-lg transition-all duration-200 group">
+                <a href="<?php echo e(route('citizen.incidents.create')); ?>" class="flex items-center px-4 py-3 text-pink-100 hover:bg-pink-900/30 rounded-lg transition-all duration-200 group">
                     <div class="w-6 h-6 flex items-center justify-center mr-3 rounded-full bg-pink-900/30 group-hover:bg-pink-500/30 transition-colors">
                         <i class="fas fa-plus-circle text-pink-300 text-sm"></i>
                     </div>
@@ -190,7 +190,7 @@
                     <span class="ml-auto px-2 py-0.5 text-xs font-medium bg-pink-500/20 text-pink-300 rounded-full">Nouveau</span>
                 </a>
                 
-                <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-3 text-pink-100 hover:bg-pink-900/30 rounded-lg transition-all duration-200 group">
+                <a href="<?php echo e(route('profile.edit')); ?>" class="flex items-center px-4 py-3 text-pink-100 hover:bg-pink-900/30 rounded-lg transition-all duration-200 group">
                     <div class="w-6 h-6 flex items-center justify-center mr-3 rounded-full bg-pink-900/30 group-hover:bg-pink-500/30 transition-colors">
                         <i class="fas fa-user text-pink-300 text-sm"></i>
                     </div>
@@ -198,8 +198,8 @@
                 </a>
                 
                 <div class="pt-4 mt-4 border-t border-pink-900/30">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="w-full flex items-center px-4 py-3 text-pink-200 hover:bg-pink-900/20 rounded-lg transition-all duration-200 group">
                             <div class="w-6 h-6 flex items-center justify-center mr-3 rounded-full bg-pink-900/30 group-hover:bg-pink-500/30 transition-colors">
                                 <i class="fas fa-sign-out-alt text-pink-300 text-sm"></i>
@@ -214,10 +214,11 @@
             <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pink-900/30 bg-gradient-to-t from-pink-900/30 to-transparent backdrop-blur-sm">
                 <div class="flex items-center">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 shadow-md flex items-center justify-center text-white font-bold">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        <?php echo e(strtoupper(substr(auth()->user()->name, 0, 1))); ?>
+
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
+                        <p class="text-sm font-medium text-white"><?php echo e(auth()->user()->name); ?></p>
                         <p class="text-xs text-pink-200/80">Compte Citoyen</p>
                     </div>
                     <div class="ml-auto">
@@ -236,20 +237,21 @@
                     <h1 class="title">Mes Signalements</h1>
                     <p class="subtitle">Consultez et gérez tous vos signalements</p>
                 </div>
-                <a href="{{ route('citizen.incidents.create') }}" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition flex items-center">
+                <a href="<?php echo e(route('citizen.incidents.create')); ?>" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition flex items-center">
                     <i class="fas fa-plus-circle mr-2"></i>
                     <span>Nouveau signalement</span>
                 </a>
             </div>
 
-    @if(session('success'))
+    <?php if(session('success')): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 flex items-center">
             <i class="fas fa-check-circle mr-2"></i>
-            {{ session('success') }}
-        </div>
-    @endif
+            <?php echo e(session('success')); ?>
 
-    @if($incidents->isEmpty())
+        </div>
+    <?php endif; ?>
+
+    <?php if($incidents->isEmpty()): ?>
         <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
             <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-gray-50 mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -258,31 +260,32 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-800 mb-2">Aucun signalement pour le moment</h3>
             <p class="text-gray-500 mb-6 max-w-md mx-auto">Vous n'avez pas encore créé de signalement. Commencez par signaler un incident pour contribuer à la sécurité de votre quartier.</p>
-            <a href="{{ route('citizen.incidents.create') }}" class="inline-flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition">
+            <a href="<?php echo e(route('citizen.incidents.create')); ?>" class="inline-flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition">
                 <i class="fas fa-plus-circle mr-2"></i>
                 <span>Signaler un incident</span>
             </a>
         </div>
-    @else
+    <?php else: ?>
         <div class="space-y-6">
-            @foreach($incidents as $incident)
+            <?php $__currentLoopData = $incidents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $incident): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <!-- Incident Card -->
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-pink-50 hover:shadow-2xl transition-all duration-300" id="incident-{{ $incident->id }}">
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-pink-50 hover:shadow-2xl transition-all duration-300" id="incident-<?php echo e($incident->id); ?>">
                     <!-- Header -->
                     <div class="p-5 flex items-center">
                         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 flex items-center justify-center text-white font-semibold shadow-md">
-                            {{ strtoupper(substr($incident->user->name, 0, 1)) }}
+                            <?php echo e(strtoupper(substr($incident->user->name, 0, 1))); ?>
+
                         </div>
                         <div class="ml-4">
-                            <h3 class="font-semibold text-gray-900 text-sm">{{ $incident->user->name }}</h3>
+                            <h3 class="font-semibold text-gray-900 text-sm"><?php echo e($incident->user->name); ?></h3>
                             <div class="flex items-center text-xs text-gray-500">
-                                <span>{{ $incident->created_at->diffForHumans() }}</span>
+                                <span><?php echo e($incident->created_at->diffForHumans()); ?></span>
                                 <span class="mx-1">•</span>
                                 <i class="fas fa-map-marker-alt text-pink-400"></i>
                             </div>
                         </div>
                         <div class="ml-auto">
-                            @php
+                            <?php
                                 $statusSlug = $incident->status->slug ?? strtolower($incident->status ?? '');
                                 $statusName = $incident->status->name ?? $incident->status ?? 'N/A';
                                 
@@ -295,14 +298,15 @@
                                 ];
                                 
                                 $statusClass = $statusClasses[strtolower($statusSlug)] ?? 'bg-gray-100 text-gray-800';
-                            @endphp
+                            ?>
                             <div class="flex items-center space-x-2">
-                                <button class="vote-btn flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm transition-colors" data-id="{{ $incident->id }}">
+                                <button class="vote-btn flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm transition-colors" data-id="<?php echo e($incident->id); ?>">
                                     <i class="fas fa-fire text-pink-500"></i>
-                                    <span class="ml-1 vote-count">{{ $incident->votes_count ?? 0 }}</span>
+                                    <span class="ml-1 vote-count"><?php echo e($incident->votes_count ?? 0); ?></span>
                                 </button>
-                                <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }} shadow-sm">
-                                    {{ ucwords(str_replace('_', ' ', $statusName)) }}
+                                <span class="px-3 py-1 rounded-full text-xs font-medium <?php echo e($statusClass); ?> shadow-sm">
+                                    <?php echo e(ucwords(str_replace('_', ' ', $statusName))); ?>
+
                                 </span>
                             </div>
                             </span>
@@ -311,69 +315,71 @@
 
                     <!-- Content -->
                     <div class="px-5 pb-4">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-2">{{ $incident->title ?? ucfirst($incident->type) }}</h2>
-                        <p class="text-gray-700 text-sm leading-relaxed">{{ $incident->description }}</p>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-2"><?php echo e($incident->title ?? ucfirst($incident->type)); ?></h2>
+                        <p class="text-gray-700 text-sm leading-relaxed"><?php echo e($incident->description); ?></p>
                     </div>
 
                     <!-- Location -->
-                    @php
+                    <?php
                         $address1 = $incident->address_line1;
                         $address2 = $incident->address_line2;
                         $city = $incident->city;
                         $postalCode = $incident->postal_code;
-                    @endphp
-                    @if($address1 || $address2 || $city || $postalCode)
+                    ?>
+                    <?php if($address1 || $address2 || $city || $postalCode): ?>
                     <div class="px-5 pb-4">
                         <div class="flex items-start text-sm">
                             <i class="fas fa-map-marker-alt mt-1 mr-2 text-pink-500"></i>
                             <div class="space-y-1">
-                                @if($address1)
-                                    <div class="font-medium text-gray-900">{{ $address1 }}</div>
-                                    @if($address2)
-                                        <div class="text-gray-700">{{ $address2 }}</div>
-                                    @endif
-                                @endif
-                                @if($city || $postalCode)
+                                <?php if($address1): ?>
+                                    <div class="font-medium text-gray-900"><?php echo e($address1); ?></div>
+                                    <?php if($address2): ?>
+                                        <div class="text-gray-700"><?php echo e($address2); ?></div>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <?php if($city || $postalCode): ?>
                                 <div class="flex flex-wrap items-center gap-x-3 text-gray-600 mt-1">
-                                    @if($city)
+                                    <?php if($city): ?>
                                         <span class="inline-flex items-center">
                                             <i class="fas fa-city mr-1 text-pink-400"></i>
-                                            {{ $city }}
+                                            <?php echo e($city); ?>
+
                                         </span>
-                                    @endif
-                                    @if($postalCode)
+                                    <?php endif; ?>
+                                    <?php if($postalCode): ?>
                                         <span class="inline-flex items-center">
                                             <i class="fas fa-mailbox mr-1 text-pink-400"></i>
-                                            {{ $postalCode }}
+                                            <?php echo e($postalCode); ?>
+
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Media Section -->
-                    @if($incident->images->isNotEmpty())
+                    <?php if($incident->images->isNotEmpty()): ?>
                     <div class="px-5 pb-4">
                         <div class="grid grid-cols-3 gap-2">
-                            @foreach($incident->images->take(3) as $image)
+                            <?php $__currentLoopData = $incident->images->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-                                <img src="{{ asset('storage/' . $image->path) }}" 
+                                <img src="<?php echo e(asset('storage/' . $image->path)); ?>" 
                                      alt="Incident image" 
                                      class="w-full h-full object-cover">
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Footer -->
                     <div class="px-5 py-3 border-t border-gray-100 bg-gray-50">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
-                                <a href="{{ route('citizen.incidents.show', $incident) }}" class="text-sm font-medium text-pink-600 hover:text-pink-800 flex items-center">
+                                <a href="<?php echo e(route('citizen.incidents.show', $incident)); ?>" class="text-sm font-medium text-pink-600 hover:text-pink-800 flex items-center">
                                     Voir les détails
                                     <i class="fas fa-chevron-right ml-1 text-xs"></i>
                                 </a>
@@ -381,11 +387,13 @@
                             <div class="flex items-center space-x-3">
                                 <span class="text-sm text-gray-500">
                                     <i class="far fa-comment-alt mr-1"></i>
-                                    {{ $incident->comments_count ?? 0 }}
+                                    <?php echo e($incident->comments_count ?? 0); ?>
+
                                 </span>
                                 <span class="text-sm text-gray-500">
                                     <i class="far fa-thumbs-up mr-1"></i>
-                                    {{ $incident->votes_count ?? 0 }}
+                                    <?php echo e($incident->votes_count ?? 0); ?>
+
                                 </span>
                             </div>
                         </div>
@@ -395,32 +403,34 @@
                             <div class="flex items-center text-sm text-gray-500">
                                 <button class="flex items-center space-x-1 hover:text-purple-600 transition-colors">
                                     <i class="far fa-comment-alt"></i>
-                                    <span>{{ $incident->comments_count ?? 0 }} commentaires</span>
+                                    <span><?php echo e($incident->comments_count ?? 0); ?> commentaires</span>
                                 </button>
                             </div>
                             <div class="flex items-center text-sm text-gray-500">
-                                <form action="{{ route('citizen.incidents.vote', $incident) }}" method="POST" class="flex items-center">
-                                    @csrf
+                                <form action="<?php echo e(route('citizen.incidents.vote', $incident)); ?>" method="POST" class="flex items-center">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="flex items-center space-x-1 hover:text-yellow-500 transition-colors">
                                         <i class="fas fa-thumbs-up"></i>
-                                        <span>{{ $incident->votes_count ?? 0 }} votes</span>
+                                        <span><?php echo e($incident->votes_count ?? 0); ?> votes</span>
                                     </button>
                                 </form>
                             </div>
                         </div>
                         <div class="text-sm text-gray-500">
-                            Signalé il y a {{ $incident->created_at->diffForHumans() }}
+                            Signalé il y a <?php echo e($incident->created_at->diffForHumans()); ?>
+
                         </div>
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
         
         <div class="mt-8">
                 <div class="mt-8">
-                    {{ $incidents->links() }}
+                    <?php echo e($incidents->links()); ?>
+
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
@@ -468,7 +478,7 @@
                 fetch(`/incidents/${id}/vote`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
@@ -509,3 +519,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\Users\zerni\CascadeProjects\windsurf-project-8\SafeCity\resources\views/citizen/incidents/index.blade.php ENDPATH**/ ?>

@@ -11,12 +11,12 @@ class CategoriesSeeder extends Seeder
     {
         DB::table('categories')->insert([
             ['name' => 'Accident'],
+            ['name' => 'Vol'],
             ['name' => 'Incendie'],
             ['name' => 'Agression'],
-            ['name' => 'Vol'],
-            ['name' => 'Problème routier'],
-            ['name' => 'Pollution'],
-            ['name' => 'Service public'],
+            ['name' => 'Panne'],
+            ['name' => 'Dégradation'],
+            ['name' => 'Danger Public'],
         ]);
     }
 }

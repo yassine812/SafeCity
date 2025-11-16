@@ -30,45 +30,22 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Vérifier si l'utilisateur existe déjà avec cet email
-        $existingUser = User::where('email', $request->email)->first();
-
-        if ($existingUser) {
-            // Si l'utilisateur existe déjà via un fournisseur externe
-            if ($existingUser->provider) {
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'email' => "Cette adresse e-mail est déjà associée à un compte " . ucfirst($existingUser->provider) . ". Veuillez vous connecter avec " . ucfirst($existingUser->provider) . ".",
-                    ]);
-            }
-
-            // Si l'utilisateur existe déjà avec un mot de passe
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'email' => 'Cette adresse e-mail est déjà utilisée. Veuillez vous connecter ou utiliser une autre adresse e-mail.',
-                ]);
-        }
-
-        // Créer un nouvel utilisateur
-        $user = new User();
-        $user->fill([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password, // Will be hashed by the model's setPasswordAttribute mutator
+            'password' => Hash::make($request->password),
+            'role' => 'citoyen',
         ]);
-        $user->save();
 
         event(new Registered($user));
 
-        // Rediriger vers la page de connexion avec un message de succès
-        return redirect(route('login'))
-            ->with('status', 'Inscription réussie ! Veuillez vous connecter avec vos identifiants.');
+        return redirect()
+               ->route('login')
+               ->with('success', 'Votre compte a été créé. Veuillez vous connecter.');
     }
 }
