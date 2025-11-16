@@ -43,7 +43,9 @@ class CustomLoginController extends Controller
         // Tenter de connecter l'utilisateur
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('citizen.dashboard'));
+            return redirect()
+                ->intended(route('citizen.dashboard'))
+                ->with('success', 'Connexion réussie ! Bienvenue sur SafeCity.');
         }
 
         // Si l'authentification échoue

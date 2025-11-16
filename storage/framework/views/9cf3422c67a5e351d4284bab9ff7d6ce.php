@@ -132,6 +132,14 @@
             <div class="absolute -bottom-4 left-0 w-16 h-1 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full"></div>
         </div>
 
+        <!-- Success Message -->
+        <?php if(session('status')): ?>
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                <?php echo e(session('status')); ?>
+
+            </div>
+        <?php endif; ?>
+
         <form method="POST" action="<?php echo e(route('login')); ?>" class="space-y-5">
             <?php echo csrf_field(); ?>
 

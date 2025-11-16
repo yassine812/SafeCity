@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Incident extends Model
 {
     protected $fillable = [
-        'user_id',
+        'citizen_id',
         'title',
         'description',
         'category_id',
@@ -30,22 +30,22 @@ class Incident extends Model
         'longitude' => 'float',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'citizen_id');
     }
     
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
     
-    public function status()
+    public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class);
     }
     
-    public function images()
+    public function images(): HasMany
     {
         return $this->hasMany(IncidentImage::class);
     }

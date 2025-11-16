@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Citizen;
 
+use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
 use App\Models\Incident;
 use App\Models\Category;
@@ -54,64 +55,65 @@ class IncidentController extends Controller
      */
     public function store(Request $request)
     {
+        \Log::info('Incident creation request:', $request->except(['_token']));
+
         // Rate limiting: max 5 incidents per hour per IP
-        $executed = RateLimiter::attempt(
-            $this->throttleKey($request),
-            $perHour = 5,
-            function() {}
-        );
-
-        if (!$executed) {
-            return back()->with('error', 'Too many incident reports. Please try again later.');
+        if (!RateLimiter::attempt($this->throttleKey($request), 5, function() {})) {
+            return back()->with('error', 'Trop de signalements. Veuillez réessayer plus tard.');
         }
 
-        // Combine address fields into a single location string
-        $location = trim(implode(', ', array_filter([
-            $request->input('address'),
-            $request->input('postal_code'),
-            $request->input('city')
-        ])));
+        try {
+            $validated = $request->validate([
+                'title'         => 'required|string|max:255',
+                'description'   => 'required|string|max:2000',
+                'category_id'   => 'required|exists:categories,id',
+                'address'       => 'required|string|max:255',
+                'city'          => 'required|string|max:255',
+                'postal_code'   => 'required|string|max:20',
+                'latitude'      => 'required|numeric',
+                'longitude'     => 'required|numeric',
+                'location'      => 'nullable|string|max:500',
+                'media'         => 'nullable|array|max:10',
+                'media.*'       => 'file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:20480',
+            ]);
 
-        // Add the combined location to the request
-        $request->merge(['location' => $location]);
+            $location = $validated['location'] ?? trim(implode(', ', [$validated['address'], $validated['city'], $validated['postal_code']]), ', ');
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:2000',
-            'category_id' => 'required|exists:categories,id',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:20',
-            'location' => 'required|string|max:500',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max per image
-            'videos.*' => 'nullable|mimetypes:video/mp4,video/quicktime,video/x-msvideo|max:20480', // 20MB max per video
-        ], [
-            'images.*.max' => 'Each image must not be larger than 5MB.',
-            'videos.*.max' => 'Each video must not be larger than 20MB.',
-            'videos.*.mimetypes' => 'The video must be a file of type: mp4, mov, avi.',
-        ]);
+            // Create incident
+            $incident = Auth::user()->incidents()->create([
+                'title'       => $validated['title'],
+                'description' => $validated['description'],
+                'category_id' => $validated['category_id'],
+                'location'    => $location,
+                'latitude'    => $validated['latitude'],
+                'longitude'   => $validated['longitude'],
+                'status_id'   => 1, // Nouveau
+            ]);
 
-        $incident = Auth::user()->incidents()->create([
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'category_id' => $validated['category_id'],
-            'location' => $validated['location'],
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
-            'status_id' => Status::where('name', 'Pending')->firstOrFail()->id,
-        ]);
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('incidents/' . $incident->id, 'public');
-                $incident->images()->create(['path' => $path]);
+            // Save media files
+            if ($request->hasFile('media')) {
+                foreach ($request->file('media') as $file) {
+                    $path = $file->store("incidents/{$incident->id}", 'public');
+                    $incident->images()->create(['path' => $path]);
+                }
             }
-        }
 
-        return redirect()->route('citizen.dashboard')
-            ->with('success', 'Incident reported successfully! Our team will review it shortly.');
+            return redirect()->route('citizen.dashboard')
+                ->with('success', 'Signalement créé avec succès !');
+                
+        } catch (ValidationException $e) {
+            \Log::error('Validation error during incident creation: ' . $e->getMessage(), [
+                'errors' => $e->errors(),
+            ]);
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error creating incident: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with('error', 'Une erreur est survenue lors de la création du signalement. Veuillez réessayer.')->withInput();
+        }
     }
 
     /**

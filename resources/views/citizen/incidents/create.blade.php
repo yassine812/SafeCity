@@ -217,16 +217,31 @@
             <form action="{{ route('citizen.incidents.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
                 @csrf
 
+                @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded">
+                    <b>Une erreur est survenue :</b>
+                    <ul class="mt-2 list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <div class="space-y-6 p-6">
-                    <!-- Type d'incident (as text field) -->
+                    <!-- Category -->
                     <div class="space-y-2">
-                        <label for="type" class="block text-sm font-medium text-gray-700">Type d'incident <span class="text-pink-500">*</span></label>
-                        <div class="relative">
-                            <input type="text" name="type" id="type" value="{{ old('type') }}" required 
-                                class="block w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm" 
-                                placeholder="Ex: Déchets, Voirie, Éclairage, etc.">
-                        </div>
-                        @error('type')
+                        <label for="category_id" class="block text-sm font-medium text-gray-700">Catégorie <span class="text-pink-500">*</span></label>
+                        <select name="category_id" id="category_id" required 
+                                class="block w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm">
+                            <option value="" disabled {{ old('category_id') ? '' : 'selected' }}>Sélectionnez une catégorie</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id')
                             <p class="mt-1 text-sm text-pink-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -257,6 +272,42 @@
                         @enderror
                     </div>
 
+                    <!-- Ville -->
+                    <div class="space-y-2">
+                        <label for="city" class="block text-sm font-medium text-gray-700">Ville <span class="text-pink-500">*</span></label>
+                        <select name="city" id="city" required 
+                            class="block w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm">
+                            <option value="" disabled {{ old('city') ? '' : 'selected' }}>Sélectionnez une ville</option>
+                            <option value="Ariana" {{ old('city') == 'Ariana' ? 'selected' : '' }}>Ariana</option>
+                            <option value="Béja" {{ old('city') == 'Béja' ? 'selected' : '' }}>Béja</option>
+                            <option value="Ben Arous" {{ old('city') == 'Ben Arous' ? 'selected' : '' }}>Ben Arous</option>
+                            <option value="Bizerte" {{ old('city') == 'Bizerte' ? 'selected' : '' }}>Bizerte</option>
+                            <option value="Gabès" {{ old('city') == 'Gabès' ? 'selected' : '' }}>Gabès</option>
+                            <option value="Gafsa" {{ old('city') == 'Gafsa' ? 'selected' : '' }}>Gafsa</option>
+                            <option value="Jendouba" {{ old('city') == 'Jendouba' ? 'selected' : '' }}>Jendouba</option>
+                            <option value="Kairouan" {{ old('city') == 'Kairouan' ? 'selected' : '' }}>Kairouan</option>
+                            <option value="Kasserine" {{ old('city') == 'Kasserine' ? 'selected' : '' }}>Kasserine</option>
+                            <option value="Kébili" {{ old('city') == 'Kébili' ? 'selected' : '' }}>Kébili</option>
+                            <option value="Le Kef" {{ old('city') == 'Le Kef' ? 'selected' : '' }}>Le Kef</option>
+                            <option value="Mahdia" {{ old('city') == 'Mahdia' ? 'selected' : '' }}>Mahdia</option>
+                            <option value="Manouba" {{ old('city') == 'Manouba' ? 'selected' : '' }}>Manouba</option>
+                            <option value="Médenine" {{ old('city') == 'Médenine' ? 'selected' : '' }}>Médenine</option>
+                            <option value="Monastir" {{ old('city') == 'Monastir' ? 'selected' : '' }}>Monastir</option>
+                            <option value="Nabeul" {{ old('city') == 'Nabeul' ? 'selected' : '' }}>Nabeul</option>
+                            <option value="Sfax" {{ old('city') == 'Sfax' ? 'selected' : '' }}>Sfax</option>
+                            <option value="Sidi Bouzid" {{ old('city') == 'Sidi Bouzid' ? 'selected' : '' }}>Sidi Bouzid</option>
+                            <option value="Siliana" {{ old('city') == 'Siliana' ? 'selected' : '' }}>Siliana</option>
+                            <option value="Sousse" {{ old('city') == 'Sousse' ? 'selected' : '' }}>Sousse</option>
+                            <option value="Tataouine" {{ old('city') == 'Tataouine' ? 'selected' : '' }}>Tataouine</option>
+                            <option value="Tozeur" {{ old('city') == 'Tozeur' ? 'selected' : '' }}>Tozeur</option>
+                            <option value="Tunis" {{ old('city') == 'Tunis' ? 'selected' : '' }}>Tunis</option>
+                            <option value="Zaghouan" {{ old('city') == 'Zaghouan' ? 'selected' : '' }}>Zaghouan</option>
+                        </select>
+                        @error('city')
+                            <p class="mt-1 text-sm text-pink-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
                     <!-- Adresse -->
                     <div class="space-y-2">
                         <label for="address" class="block text-sm font-medium text-gray-700">Adresse <span class="text-pink-500">*</span></label>
@@ -264,17 +315,6 @@
                             class="block w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm" 
                             placeholder="Adresse complète">
                         @error('address')
-                            <p class="mt-1 text-sm text-pink-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <!-- Ville -->
-                    <div class="space-y-2">
-                        <label for="city" class="block text-sm font-medium text-gray-700">Ville <span class="text-pink-500">*</span></label>
-                        <input type="text" name="city" id="city" value="{{ old('city') }}" required 
-                            class="block w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm" 
-                            placeholder="Ville">
-                        @error('city')
                             <p class="mt-1 text-sm text-pink-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -290,24 +330,15 @@
                         @enderror
                     </div>
                     
-                    <!-- Champs cachés pour la localisation -->
-                    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', '0') }}">
-                    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', '0') }}">
-                        @error('location')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        @error('latitude')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        @error('longitude')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <!-- Location fields (hidden, using default values) -->
+                    <input type="hidden" id="location" name="location" value="Casablanca, Maroc">
+                    <input type="hidden" id="latitude" name="latitude" value="33.5731">
+                    <input type="hidden" id="longitude" name="longitude" value="-7.5898">
 
-                    <!-- Téléchargement d'images multiples -->
-                    <div class="mb-6" x-data="{ files: [] }" x-on:change="files = Array.from($event.target.files)">
+                    <!-- File Upload Dropzone -->
+                    <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Photos / Vidéos de l'incident
+                            Photos / Vidéos de l'incident (max 5)
                         </label>
 
                         <input 
@@ -316,19 +347,29 @@
                             name="media[]"
                             accept="image/*,video/*"
                             multiple
-                            class="block w-full text-sm text-gray-500 file:bg-pink-500 file:text-white file:px-4 file:py-2 file:rounded-lg file:border-0 file:cursor-pointer hover:file:bg-pink-600 transition-colors duration-200"
-                        >
+                            class="hidden"
+                        />
 
-                        <!-- Preview Grid -->
-                        <div class="flex justify-between items-center mt-2">
-                            <p id="fileCounter" class="text-xs text-gray-500">0 fichier(s) sélectionné(s)</p>
-                            <p class="text-xs text-gray-500">Max 10 fichiers</p>
+                        <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-pink-400 transition-colors duration-200"
+                             onclick="document.getElementById('mediaInput').click()"
+                             ondrop="handleDrop(event)"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <div class="space-y-2">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                                <p class="text-sm text-gray-600">Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
+                                <p class="text-xs text-gray-500">Formats acceptés : JPG, PNG, GIF, MP4 (max 5 fichiers)</p>
+                            </div>
                         </div>
-                        <div id="mediaPreview" class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
 
-                        @error('media.*')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @error('media')
+                            <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
+                        @error('media.*')
+                            <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
+                        @enderror
+
+                        <div id="mediaPreview" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4"></div>
                     </div>
                 </div>
 
@@ -349,27 +390,6 @@
     </div>
 </div>
 
-<!-- Map Modal -->
-<div id="mapModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg w-full max-w-4xl h-3/4 flex flex-col">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="text-lg font-medium text-gray-900">Sélectionner un emplacement sur la carte</h3>
-            <button type="button" id="closeMapModal" class="text-gray-400 hover:text-gray-500">
-                <span class="sr-only">Fermer</span>
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        <div class="flex-1 p-4">
-            <div id="map" class="w-full h-full rounded-lg border border-gray-300"></div>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-            <button type="button" id="cancelLocation" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Annuler
-            </button>
-            <button type="button" id="confirmLocation" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Confirmer l'emplacement
             </button>
         </div>
     </div>
@@ -416,21 +436,28 @@
         const locationInput = document.getElementById('location');
         const latitudeInput = document.getElementById('latitude');
         const longitudeInput = document.getElementById('longitude');
+        const selectedLocationText = document.getElementById('selectedLocationText');
 
-        // Initialize map when modal opens
         let map, marker;
-        
+
+        // Function to update location inputs and text
+        function updateLocationDisplay(lat, lng, address) {
+            latitudeInput.value = lat.toFixed(6);
+            longitudeInput.value = lng.toFixed(6);
+            locationInput.value = address;
+            selectedLocationText.innerText = address;
+        }
+
         openMapModal.addEventListener('click', function() {
             mapModal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            
-            // Initialize map if not already done
             if (!map) {
                 initMap();
+            } else {
+                map.invalidateSize();
             }
         });
 
-        // Close modal functions
         function closeModal() {
             mapModal.classList.add('hidden');
             document.body.style.overflow = 'auto';
@@ -439,428 +466,391 @@
         closeMapModal.addEventListener('click', closeModal);
         cancelLocation.addEventListener('click', closeModal);
 
-        // Initialize the map
         function initMap() {
-            // Default to Casablanca coordinates if no previous location
             const defaultLat = 33.5731;
             const defaultLng = -7.5898;
-            
-            // Use previous location if available
-            const initialLat = latitudeInput.value ? parseFloat(latitudeInput.value) : defaultLat;
-            const initialLng = longitudeInput.value ? parseFloat(longitudeInput.value) : defaultLng;
-            
+            const initialLat = latitudeInput.value && latitudeInput.value !== '0' ? parseFloat(latitudeInput.value) : defaultLat;
+            const initialLng = longitudeInput.value && longitudeInput.value !== '0' ? parseFloat(longitudeInput.value) : defaultLng;
+
             map = L.map('map').setView([initialLat, initialLng], 13);
-            
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
-            
-            // Add marker
-            if (latitudeInput.value && longitudeInput.value) {
-                marker = L.marker([initialLat, initialLng], {
-                    draggable: true
-                }).addTo(map);
-            } else {
-                // Add click event to place marker
-                map.on('click', function(e) {
-                    if (marker) {
-                        marker.setLatLng(e.latlng);
-                    } else {
-                        marker = L.marker(e.latlng, {
-                            draggable: true
-                        }).addTo(map);
-                    }
-                    updateLocationInputs(e.latlng.lat, e.latlng.lng);
-                });
-            }
-            
-            // Update location when marker is dragged
-            if (marker) {
-                marker.on('dragend', function(e) {
-                    const position = marker.getLatLng();
-                    updateLocationInputs(position.lat, position.lng);
-                });
-            }
+
+            marker = L.marker([initialLat, initialLng], {
+                draggable: true
+            }).addTo(map);
+
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                reverseGeocode(position.lat, position.lng);
+            });
+
+            map.on('click', function(e) {
+                if (marker) {
+                    marker.setLatLng(e.latlng);
+                } else {
+                    marker = L.marker(e.latlng, {
+                        draggable: true
+                    }).addTo(map);
+                }
+                reverseGeocode(e.latlng.lat, e.latlng.lng);
+            });
         }
-        
-        // Update location inputs with reverse geocoding
-        function updateLocationInputs(lat, lng) {
-            // Update hidden inputs
-            latitudeInput.value = lat.toFixed(6);
-            longitudeInput.value = lng.toFixed(6);
-            
-            // Use OpenStreetMap Nominatim for reverse geocoding
+
+        function reverseGeocode(lat, lng) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=fr`)
                 .then(response => response.json())
                 .then(data => {
-                    const address = [];
-                    if (data.address.road) address.push(data.address.road);
-                    if (data.address.house_number) address.push(data.address.house_number);
-                    if (data.address.city || data.address.town || data.address.village) {
-                        address.push(data.address.city || data.address.town || data.address.village);
-                    }
-                    locationInput.value = address.join(', ');
+                    const address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    updateLocationDisplay(lat, lng, address);
                 })
                 .catch(error => {
                     console.error('Error getting address:', error);
-                    locationInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    const address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    updateLocationDisplay(lat, lng, address);
                 });
         }
-        
-        // Confirm location button
+
         confirmLocation.addEventListener('click', function() {
             if (marker) {
                 const position = marker.getLatLng();
-                updateLocationInputs(position.lat, position.lng);
+                reverseGeocode(position.lat, position.lng);
+                document.getElementById('locationStatus').textContent = 'Localisation mise à jour';
+            } else {
+                // If no marker is placed, use the center of the map
+                const center = map.getCenter();
+                reverseGeocode(center.lat, center.lng);
+                document.getElementById('locationStatus').textContent = 'Localisation mise à jour';
             }
             closeModal();
         });
+
+        // Media Upload with Preview
+        const mediaInput = document.getElementById("mediaInput");
+        const mediaPreview = document.getElementById("mediaPreview");
+        const fileCounter = document.getElementById("fileCounter");
         
-        // Image preview functionality
-        const imageInput = document.getElementById('images');
-        const imagePreview = document.getElementById('image-preview');
-        const selectedCount = document.getElementById('selected-count');
-        const maxFiles = 5;
-        const uploadArea = document.getElementById('upload-area');
-        const dropArea = document.getElementById('drop-area');
-        
-        // Initialize with empty preview
-        showNoImagesMessage();
-        
-        function updateImageCount(count) {
-            if (selectedCount) {
-                selectedCount.textContent = count;
-                selectedCount.className = count > 0 ? 'font-medium text-blue-600' : 'text-gray-500';
+        // Restore files from localStorage on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedFiles = localStorage.getItem('savedFiles');
+            if (savedFiles) {
+                try {
+                    const files = JSON.parse(savedFiles);
+                    if (files && files.length > 0) {
+                        const dataTransfer = new DataTransfer();
+                        
+                        // Create a mock FileList using DataTransfer
+                        files.forEach(fileInfo => {
+                            const file = new File(
+                                [fileInfo.data],
+                                fileInfo.name,
+                                { type: fileInfo.type }
+                            );
+                            dataTransfer.items.add(file);
+                        });
+                        
+                        mediaInput.files = dataTransfer.files;
+                        updateMediaPreview();
+                    }
+                } catch (e) {
+                    console.error('Error restoring files:', e);
+                    localStorage.removeItem('savedFiles');
+                }
             }
-        }
-        
-        function showNoImagesMessage() {
-            if (imagePreview && imagePreview.children.length === 0) {
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'col-span-full text-center py-8 text-gray-500';
-                emptyMessage.innerHTML = `
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p class="mt-2 text-sm">Aucune image sélectionnée</p>
-                    <p class="text-xs mt-1 text-gray-400">Glissez-déposez des images ici ou cliquez pour sélectionner</p>
-                `;
-                imagePreview.appendChild(emptyMessage);
-            }
+        });
+
+        mediaInput.addEventListener("change", () => {
+            updateMediaPreview();
+        });
+
+        // Handle drag over
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.add('border-pink-500', 'bg-pink-50');
         }
 
-        function createPreviewItem(file, index) {
-            // Remove the "no images" message if it exists
-            const noImagesMessage = imagePreview.querySelector('.col-span-full');
-            if (noImagesMessage) {
-                noImagesMessage.remove();
-            }
+        // Handle drag leave
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('border-pink-500', 'bg-pink-50');
+        }
 
-            const reader = new FileReader();
+        // Handle file drop
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('border-pink-500', 'bg-pink-50');
             
-            reader.onload = function(e) {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'relative group';
-                previewItem.innerHTML = `
-                    <div class="relative h-32 bg-gray-100 rounded-md overflow-hidden shadow-sm border border-gray-200">
-                        <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-full h-full object-cover transition-opacity duration-300" style="opacity: 0">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                            <button type="button" class="bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" data-index="${index}" title="Supprimer">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                            <p class="text-xs text-white truncate" title="${file.name}">${file.name}</p>
-                            <p class="text-xs text-white/80">${(file.size / 1024).toFixed(1)} KB • ${file.type.split('/')[1].toUpperCase()}</p>
-                        </div>
-                    </div>
-                `;
-                
-                // Add to preview container
-                imagePreview.appendChild(previewItem);
-                
-                // Fade in the image after it's loaded
-                const img = previewItem.querySelector('img');
-                img.onload = function() {
-                    img.style.opacity = '1';
-                };
-                
-                // Add event listener to remove button
-                const removeBtn = previewItem.querySelector('button');
-                removeBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    removeImage(index);
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+                // Update the file input with the dropped files
+                updateFileInput(files);
+            }
+        }
+
+        // Handle file selection
+        mediaInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFiles(this.files);
+                // Update the file input with the new files
+                updateFileInput(this.files);
+            }
+        });
+        
+        // Function to update the file input with selected files
+        function updateFileInput(files) {
+            const dataTransfer = new DataTransfer();
+            Array.from(files).forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            mediaInput.files = dataTransfer.files;
+        }
+
+        // Save files to localStorage
+        function saveFilesToStorage() {
+            const files = Array.from(mediaInput.files || []);
+            const filesToSave = [];
+            
+            // Convert files to base64 for storage
+            const filePromises = files.map(file => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        filesToSave.push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: e.target.result.split(',')[1] // Remove data URL prefix
+                        });
+                        resolve();
+                    };
+                    reader.readAsDataURL(file);
                 });
-            };
+            });
             
-            reader.onerror = function() {
-                console.error('Error reading file:', file.name);
-            };
-            
-            reader.readAsDataURL(file);
+            Promise.all(filePromises).then(() => {
+                localStorage.setItem('savedFiles', JSON.stringify(filesToSave));
+            });
         }
         
-        function removeImage(index) {
-            // Create a new DataTransfer object and remove the file
-            const dt = new DataTransfer();
-            const { files } = imageInput;
+        // Process selected files
+        function handleFiles(files) {
+            const MAX_FILES = 5;
+            const validFiles = [];
+            const invalidFiles = [];
             
-            // Add all files except the one to be removed
-            for (let i = 0; i < files.length; i++) {
-                if (i !== index) dt.items.add(files[i]);
-            }
+            // Get existing files
+            const existingFiles = Array.from(mediaInput.files || []);
             
-            // Update file input
-            imageInput.files = dt.files;
-            
-            // Update preview
-            updatePreview();
-        }
-        
-        function updatePreview() {
-            // Clear previous previews
-            imagePreview.innerHTML = '';
-            
-            if (!imageInput || !imageInput.files || imageInput.files.length === 0) {
-                showNoImagesMessage();
+            // Check total file count
+            if (existingFiles.length + files.length > MAX_FILES) {
+                alert(`Vous ne pouvez téléverser que ${MAX_FILES} fichiers au maximum.`);
                 return;
             }
             
-            // Process each file for preview
-            const files = Array.from(imageInput.files).slice(0, maxFiles);
-            let processedCount = 0;
-            
-            files.forEach((file, index) => {
-                if (file.type.match('image.*')) {
-                    createPreviewItem(file, index);
-                    processedCount++;
+            // Process each file
+            Array.from(files).forEach(file => {
+                const fileType = file.type.split('/')[0];
+                const validTypes = ['image', 'video'];
+                
+                if (validTypes.includes(fileType) && file.size <= 20 * 1024 * 1024) { // 20MB max
+                    // Check for duplicate files
+                    const isDuplicate = existingFiles.some(
+                        existingFile => existingFile.name === file.name && existingFile.size === file.size
+                    );
+                    
+                    if (!isDuplicate) {
+                        validFiles.push(file);
+                    }
+                } else {
+                    invalidFiles.push(file.name);
                 }
             });
             
-            // Update counter
-            updateImageCount(processedCount);
-            
-            // Show message if no valid images
-            if (processedCount === 0) {
-                showNoImagesMessage();
-            }
-        }
-        
-        // Handle file selection via input
-        imageInput.addEventListener('change', function(e) {
-            handleFiles(this.files);
-        });
-        
-        // Handle click on upload area to trigger file input
-        uploadArea.addEventListener('click', function(e) {
-            // Only trigger file input if not clicking on a remove button
-            if (!e.target.closest('button')) {
-                imageInput.click();
-            }
-        });
-        // Handle drag and drop for images
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        // Highlight drop area when item is dragged over it
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-        
-        // Handle dropped files
-        dropArea.addEventListener('drop', handleDrop, false);
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        function highlight() {
-            dropArea.classList.add('border-blue-500', 'bg-blue-50');
-        }
-        
-        function unhighlight() {
-            dropArea.classList.remove('border-blue-500', 'bg-blue-50');
-        }
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length) {
-                handleFiles(files);
-            }
-        }
-        
-        function handleFiles(files) {
-            if (!files || files.length === 0) return;
-            
-            // Convert FileList to array and filter images
-            const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-            
-            if (imageFiles.length === 0) {
-                alert('Veuillez sélectionner uniquement des fichiers image (JPG, PNG, GIF)');
-                return;
+            // Show error for invalid files
+            if (invalidFiles.length > 0) {
+                alert(`Les fichiers suivants n'ont pas été acceptés :\n${invalidFiles.join('\n')}\n\nAssurez-vous que les fichiers sont des images ou des vidéos et ne dépassent pas 20Mo.`);
             }
             
-            // Update file input
-            const dataTransfer = new DataTransfer();
-            const currentFiles = Array.from(imageInput.files || []);
-            const allFiles = [...currentFiles, ...imageFiles].slice(0, maxFiles);
+            // Check total file count
+            const currentFiles = mediaInput.files ? Array.from(mediaInput.files) : [];
+            const totalFiles = currentFiles.length + validFiles.length;
             
-            allFiles.forEach(file => dataTransfer.items.add(file));
-            imageInput.files = dataTransfer.files;
-            
-            // Update preview
-            updatePreview();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            dropArea.classList.add('border-blue-500', 'bg-blue-50');
-        }
-        
-        function unhighlight() {
-            dropArea.classList.remove('border-blue-500', 'bg-blue-50');
-        }
-        
-        dropArea.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length) {
-                // Convert FileList to array and set to input
-                const input = imageInput;
-                const newFiles = Array.from(files).filter(file => file.type.match('image.*'));
+            if (totalFiles > MAX_FILES) {
+                invalidFiles.push(`Vous ne pouvez pas sélectionner plus de ${MAX_FILES} fichiers au total`);
+            } else {
+                // Add valid files to the input
+                const dt = new DataTransfer();
                 
-                // If there are existing files, combine them (up to 5 total)
-                const existingFiles = Array.from(input.files);
-                const allFiles = [...existingFiles, ...newFiles].slice(0, 5);
+                // Add existing files
+                currentFiles.forEach(file => dt.items.add(file));
                 
-                const dataTransfer = new DataTransfer();
-                allFiles.forEach(file => dataTransfer.items.add(file));
+                // Add new valid files (up to the limit)
+                const remainingSlots = MAX_FILES - currentFiles.length;
+                validFiles.slice(0, remainingSlots).forEach(file => dt.items.add(file));
                 
-                input.files = dataTransfer.files;
-                
-                // Trigger change event to update preview
-                const event = new Event('change');
-                input.dispatchEvent(event);
+                mediaInput.files = dt.files;
+            }
+            
+            // Show error messages if any
+            if (invalidFiles.length > 0) {
+                showFileErrors(invalidFiles);
+            }
+            
+            // Update preview and save to storage
+            updateMediaPreview();
+            saveFilesToStorage();
+        }
+        
+        // Show file validation errors
+        function showFileErrors(errors) {
+            const errorHtml = errors.map(error => 
+                `<div class="p-3 mb-2 bg-red-50 text-red-700 text-sm rounded-lg flex items-start">
+                    <i class="fas fa-exclamation-circle mt-0.5 mr-2"></i>
+                    <span>${error}</span>
+                </div>`
+            ).join('');
+            
+            // Remove any existing error messages
+            const existingErrors = document.querySelectorAll('.file-upload-error');
+            existingErrors.forEach(el => el.remove());
+            
+            // Add new error messages
+            if (errors.length > 0) {
+                const errorContainer = document.createElement('div');
+                errorContainer.className = 'file-upload-error mt-3';
+                errorContainer.innerHTML = errorHtml;
+                document.querySelector('#dropzone').after(errorContainer);
             }
         }
-    });
 
-    // Multiple Media Upload with Preview
-    const input = document.getElementById("mediaInput");
-    const previewContainer = document.getElementById("mediaPreview");
-
-    if (input && previewContainer) {
-        // Initialize file counter on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateFileCounter(0);
-        });
-
-        input.addEventListener("change", function() {
-            // Clear old previews
-            while (previewContainer.firstChild) {
-                previewContainer.removeChild(previewContainer.firstChild);
+        // Update media preview
+        function updateMediaPreview() {
+            mediaPreview.innerHTML = "";
+            const files = Array.from(mediaInput.files || []);
+            
+            if (files.length === 0) {
+                // Check if we have saved files in localStorage
+                const savedFiles = localStorage.getItem('savedFiles');
+                if (savedFiles) {
+                    try {
+                        const parsedFiles = JSON.parse(savedFiles);
+                        if (parsedFiles && parsedFiles.length > 0) {
+                            // If we have saved files but no files in the input,
+                            // it means the page was just loaded and we need to restore the preview
+                            const dataTransfer = new DataTransfer();
+                            parsedFiles.forEach(fileInfo => {
+                                const file = new File(
+                                    [fileInfo.data],
+                                    fileInfo.name,
+                                    { type: fileInfo.type }
+                                );
+                                dataTransfer.items.add(file);
+                            });
+                            mediaInput.files = dataTransfer.files;
+                            files.push(...Array.from(dataTransfer.files));
+                        }
+                    } catch (e) {
+                        console.error('Error restoring files:', e);
+                        localStorage.removeItem('savedFiles');
+                    }
+                }
+                
+                if (files.length === 0) {
+                    return;
+                }
             }
 
-            const files = this.files;
-            if (!files || files.length === 0) {
-                updateFileCounter(0);
-                return;
-            }
-
-            // Process each selected file
-            Array.from(files).forEach((file, index) => {
-                const fileType = file.type.split('/')[0]; // image | video
-
+            files.forEach((file, index) => {
                 const previewItem = document.createElement("div");
-                previewItem.className = "w-full h-32 md:h-40 rounded-lg overflow-hidden shadow border border-gray-200 relative group";
-                previewItem.dataset.index = index;
-
+                previewItem.className = "relative group rounded-lg overflow-hidden border-2 border-gray-200 hover:border-pink-300 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1";
+                
                 // Remove button
                 const removeBtn = document.createElement("button");
-                removeBtn.innerHTML = "<i class='fas fa-times'></i>";
-                removeBtn.className = "absolute top-1 right-1 bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-500";
+                removeBtn.innerHTML = "<i class='fas fa-times text-sm'></i>";
+                removeBtn.className = "absolute top-2 right-2 bg-black/80 hover:bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center transition-all duration-200 transform hover:scale-110 shadow-md";
                 removeBtn.type = "button";
                 removeBtn.title = "Supprimer";
                 removeBtn.addEventListener("click", (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    removeFile(file);
-                    previewItem.remove();
-                    updateFileCounter(input.files.length);
+                    removeFile(index);
                 });
 
-                // File info overlay
+                // File info
                 const fileInfo = document.createElement("div");
-                fileInfo.className = "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-xs";
+                fileInfo.className = "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-2 text-white text-xs";
                 fileInfo.innerHTML = `
                     <div class="truncate">${file.name}</div>
-                    <div class="text-xs text-gray-300">${(file.size / 1024).toFixed(1)} KB</div>
-                `;
+                    <div class="flex justify-between items-center text-xs text-gray-300 mt-1">
+                        <span>${(file.size / 1024).toFixed(1)} KB</span>
+                        <span class="text-xs px-2 py-0.5 bg-black/30 rounded">${file.type.split('/')[1]?.toUpperCase() || 'FILE'}</span>
+                    </div>`;
 
-                // Create preview based on file type
-                if (fileType === "image") {
+                // Media preview
+                if (file.type.startsWith("image/")) {
                     const img = document.createElement("img");
                     img.src = URL.createObjectURL(file);
-                    img.className = "w-full h-full object-cover";
+                    img.className = "w-full h-32 md:h-40 object-cover";
                     img.loading = "lazy";
                     previewItem.appendChild(img);
-                } 
-                else if (fileType === "video") {
+                } else if (file.type.startsWith("video/")) {
+                    const videoContainer = document.createElement("div");
+                    videoContainer.className = "relative w-full h-32 md:h-40 bg-black";
+                    
                     const video = document.createElement("video");
                     video.src = URL.createObjectURL(file);
-                    video.className = "w-full h-full object-cover";
-                    video.controls = true;
-                    previewItem.appendChild(video);
+                    video.className = "w-full h-full object-contain";
+                    video.controls = false;
+                    
+                    const playButton = document.createElement("div");
+                    playButton.className = "absolute inset-0 flex items-center justify-center text-white text-3xl opacity-70 hover:opacity-100";
+                    playButton.innerHTML = "<i class='fas fa-play-circle'></i>";
+                    playButton.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        video.controls = !video.controls;
+                    };
+                    
+                    videoContainer.appendChild(video);
+                    videoContainer.appendChild(playButton);
+                    previewItem.appendChild(videoContainer);
                 }
 
                 previewItem.appendChild(fileInfo);
                 previewItem.appendChild(removeBtn);
-                previewContainer.appendChild(previewItem);
+                mediaPreview.appendChild(previewItem);
             });
-
-            updateFileCounter(files.length);
-        });
-
-        // Update the file counter display
-        function updateFileCounter(count) {
-            const counter = document.getElementById('fileCounter');
-            if (!counter) return;
-            
-            counter.textContent = `${count} fichier(s) sélectionné(s)`;
-            counter.className = `text-xs ${count > 0 ? 'text-pink-600 font-medium' : 'text-gray-500'}`;
         }
 
-        // Remove selected file (must rebuild FileList)
-        function removeFile(fileToRemove) {
+        // Remove file at index
+        function removeFile(indexToRemove) {
             const dt = new DataTransfer();
-            Array.from(input.files)
-                .filter(file => file !== fileToRemove)
-                .forEach(file => dt.items.add(file));
+            const files = Array.from(mediaInput.files);
             
-            input.files = dt.files;
+            files.forEach((file, index) => {
+                if (index !== indexToRemove) {
+                    dt.items.add(file);
+                }
+            });
+            
+            mediaInput.files = dt.files;
+            updateMediaPreview();
+            saveFilesToStorage();
+            
+            // Remove any error messages when all files are removed
+            if (dt.files.length === 0) {
+                const existingErrors = document.querySelectorAll('.file-upload-error');
+                existingErrors.forEach(el => el.remove());
+                localStorage.removeItem('savedFiles');
+            }
         }
-    }
+    });
 </script>
 @endpush
 
