@@ -68,5 +68,18 @@ class Incident extends Model
         return $this->votes()->where('user_id', $user->id)->exists();
     }
 
+    public function upVotes()
+    {
+        return $this->votes()->where('type', 'up');
+    }
 
+    public function downVotes()
+    {
+        return $this->votes()->where('type', 'down');
+    }
+
+    public function userVote()
+    {
+        return $this->hasOne(Vote::class)->where('user_id', auth()->id());
+    }
 }

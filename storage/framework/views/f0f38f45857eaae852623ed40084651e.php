@@ -286,18 +286,21 @@
                         </div>
                         <div class="ml-auto">
                             <?php
-                                $statusSlug = $incident->status->slug ?? strtolower($incident->status ?? '');
-                                $statusName = $incident->status->name ?? $incident->status ?? 'N/A';
+                                $statusSlug = strtolower($incident->status ?? 'en_attente');
+                                $statusName = ucfirst(str_replace('_', ' ', $incident->status ?? 'en_attente'));
                                 
                                 $statusClasses = [
-                                    'nouveau' => 'bg-blue-100 text-blue-800',
+                                    'nouveau' => 'bg-yellow-100 text-yellow-800',
                                     'en_attente' => 'bg-yellow-100 text-yellow-800',
                                     'en_cours' => 'bg-blue-100 text-blue-800',
                                     'resolu' => 'bg-green-100 text-green-800',
                                     'ferme' => 'bg-gray-100 text-gray-800'
                                 ];
                                 
-                                $statusClass = $statusClasses[strtolower($statusSlug)] ?? 'bg-gray-100 text-gray-800';
+                                // Map 'nouveau' status to display as 'En attente'
+                                $displayStatus = ($statusSlug === 'nouveau') ? 'En attente' : $statusName;
+                                
+                                $statusClass = $statusClasses[$statusSlug] ?? 'bg-gray-100 text-gray-800';
                             ?>
                             <div class="flex items-center space-x-2">
                                 <button class="vote-btn flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm transition-colors" data-id="<?php echo e($incident->id); ?>">
@@ -305,7 +308,7 @@
                                     <span class="ml-1 vote-count"><?php echo e($incident->votes_count ?? 0); ?></span>
                                 </button>
                                 <span class="px-3 py-1 rounded-full text-xs font-medium <?php echo e($statusClass); ?> shadow-sm">
-                                    <?php echo e(ucwords(str_replace('_', ' ', $statusName))); ?>
+                                    <?php echo e($displayStatus); ?>
 
                                 </span>
                             </div>
@@ -379,9 +382,9 @@
                     <div class="px-5 py-3 border-t border-gray-100 bg-gray-50">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
-                                <a href="<?php echo e(route('citizen.incidents.show', $incident)); ?>" class="text-sm font-medium text-pink-600 hover:text-pink-800 flex items-center">
-                                    Voir les détails
-                                    <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                                <a href="<?php echo e(route('citizen.incidents.edit', $incident)); ?>" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    Modifier
                                 </a>
                             </div>
                             <div class="flex items-center space-x-3">

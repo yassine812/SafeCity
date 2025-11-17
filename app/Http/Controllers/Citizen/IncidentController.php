@@ -36,6 +36,25 @@ class IncidentController extends Controller
     /**
      * Store a new incident
      */
+    /**
+     * Show the form for editing the specified incident.
+     */
+    public function edit(Incident $incident)
+    {
+        // Check if the authenticated user is the owner of the incident
+        if ($incident->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $categories = Category::all();
+        $incident->load('images'); // Load the images relationship
+        
+        return view('citizen.incidents.edit', compact('incident', 'categories'));
+    }
+
+    /**
+     * Store a new incident
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -78,6 +97,53 @@ class IncidentController extends Controller
     }
 
     /**
+     * Update the specified incident in storage.
+     */
+    public function update(Request $request, Incident $incident)
+    {
+        // Check if the authenticated user is the owner of the incident
+        if ($incident->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'category_id'  => 'nullable|exists:categories,id',
+            'title'        => 'required|string|max:255',
+            'description'  => 'required|string|max:2000',
+            'city'         => 'required|string|max:255',
+            'address_line1'=> 'required|string|max:255',
+            'postal_code'  => 'required|string|max:20',
+            'country'      => 'required|string|max:255',
+            'media.*'      => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov|max:20480'
+        ]);
+
+        // UPDATE INCIDENT
+        $incident->update([
+            'category_id'  => $validated['category_id'] ?? null,
+            'title'        => $validated['title'],
+            'description'  => $validated['description'],
+            'city'         => $validated['city'],
+            'address_line1'=> $validated['address_line1'],
+            'postal_code'  => $validated['postal_code'],
+            'country'      => $validated['country'],
+        ]);
+
+        // SAVE NEW MEDIA
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+                $path = $file->store("incidents/{$incident->id}", 'public');
+                $incident->images()->create([
+                    'path' => $path
+                ]);
+            }
+        }
+
+        return redirect()
+            ->route('citizen.incidents.show', $incident)
+            ->with('success', 'Incident mis à jour avec succès.');
+    }
+
+    /**
      * Show incident
      */
     public function show(Incident $incident)
@@ -114,30 +180,29 @@ class IncidentController extends Controller
         $incident = Incident::findOrFail($id);
         $user = auth()->user();
 
-        // Already voted?
-        $already = Vote::where('user_id', $user->id)
-                       ->where('incident_id', $id)
-                       ->exists();
+        $hasVoted = Vote::where('user_id', $user->id)
+                        ->where('incident_id', $id)
+                        ->exists();
 
-        if ($already) {
+        if ($hasVoted) {
             return response()->json([
-                'message' => 'Already voted',
-                'votes' => $incident->votes_count
+                'success' => true,
+                'has_voted' => false,
+                'votes_count' => $incident->votes_count
             ]);
         }
 
-        // Save vote
         Vote::create([
             'user_id' => $user->id,
             'incident_id' => $id
         ]);
 
-        // Increase counter
         $incident->increment('votes_count');
 
         return response()->json([
-            'message' => 'Vote added',
-            'votes' => $incident->fresh()->votes_count
+            'success' => true,
+            'has_voted' => true,
+            'votes_count' => $incident->votes_count
         ]);
     }
 }

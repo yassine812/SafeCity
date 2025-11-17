@@ -45,33 +45,19 @@ Route::middleware('auth')->group(function () {
         ->name('citizen.incidents.show');
         
     // Vote on incident
-    Route::post('citizen/incidents/{incident}/vote', [\App\Http\Controllers\Citizen\VoteController::class, 'toggle'])
+    Route::post('/citizen/incidents/{incident}/vote', 
+        [\App\Http\Controllers\Citizen\IncidentController::class, 'vote'])
         ->name('citizen.incidents.vote');
-        
-    // Comments on incident
-    // Comments
-Route::post('/incidents/{incident}/comments', [CommentController::class, 'store'])
-    ->name('comments.store')
-    ->middleware('auth');
 
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
-    ->name('comments.destroy')
-    ->middleware('auth');
-
-    // Incidents
-    Route::resource('incidents', \App\Http\Controllers\IncidentController::class)
-        ->middleware('auth');
+    // Comment on incident
+    Route::post('/citizen/incidents/{incident}/comment',
+        [\App\Http\Controllers\Citizen\CommentController::class, 'store'])
+        ->name('citizen.incidents.comment');
 
     // Incident Images
     Route::delete('/incident-images/{image}', 
         [\App\Http\Controllers\Citizen\IncidentImageController::class, 'destroy'])
         ->name('incident-images.destroy')
-        ->middleware('auth');
-
-    // Vote on incident (new route)
-    Route::post('/incidents/{incident}/vote', 
-        [\App\Http\Controllers\Citizen\IncidentController::class, 'vote'])
-        ->name('incidents.vote')
         ->middleware('auth');
 });
 

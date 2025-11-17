@@ -164,6 +164,18 @@
             margin-bottom: 30px;
             font-size: 16px;
         }
+
+        .comment-section {
+            position: relative;
+            z-index: 50;
+            pointer-events: auto !important;
+        }
+
+        .send-btn {
+            cursor: pointer;
+            z-index: 9999;
+            pointer-events: auto;
+        }
     </style>
 </head>
 
@@ -219,7 +231,7 @@
                 <div class="pt-4 mt-4 border-t border-pink-900/30">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full flex items-center px-4 py-3 text-pink-200 hover:bg-pink-900/20 rounded-lg transition-all duration-200 group">
+                        <button type="submit" class="w-full flex items-center px-4 py-3 text-pink-200 hover:text-white" onclick="toggleSidebar()">
                             <div class="w-6 h-6 flex items-center justify-center mr-3 rounded-full bg-pink-900/30 group-hover:bg-pink-500/30 transition-colors">
                                 <i class="fas fa-sign-out-alt text-pink-300 text-sm"></i>
                             </div>
@@ -268,7 +280,7 @@
                 <div class="space-y-6">
                     @forelse($incidents as $incident)
                     <!-- Enhanced Post Card with Vote + Comment -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-pink-50 hover:shadow-2xl transition-all duration-300" id="post-{{ $incident->id }}">
+                    <div class="bg-white rounded-2xl shadow-lg overflow-visible border border-pink-50 hover:shadow-2xl transition-all duration-300" id="post-{{ $incident->id }}">
                         <!-- Header -->
                         <div class="p-5 flex items-center">
                             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 flex items-center justify-center text-white font-semibold shadow-md">
@@ -284,18 +296,24 @@
                             </div>
                             <div class="ml-auto">
                                 @php
-                                    $statusSlug = $incident->status->slug ?? strtolower($incident->status ?? '');
-                                    $statusName = $incident->status->name ?? $incident->status ?? 'N/A';
+                                    // Always show 'En attente' status for all posts
+                                    $statusSlug = 'en_attente';
+                                    $statusName = 'En attente';
+                                    $statusClass = 'bg-yellow-100 text-yellow-800';
                                     
-                                    $statusClasses = [
-                                        'nouveau' => 'bg-blue-100 text-blue-800',
-                                        'en_attente' => 'bg-yellow-100 text-yellow-800',
-                                        'en_cours' => 'bg-blue-100 text-blue-800',
-                                        'resolu' => 'bg-green-100 text-green-800',
-                                        'ferme' => 'bg-gray-100 text-gray-800'
-                                    ];
-                                    
-                                    $statusClass = $statusClasses[strtolower($statusSlug)] ?? 'bg-gray-100 text-gray-800';
+                                    // Only show actual status if it's not 'nouveau' and not empty
+                                    if (!empty($incident->status)) {
+                                        $dbStatusSlug = strtolower($incident->status->slug ?? $incident->status);
+                                        if ($dbStatusSlug !== 'nouveau' && $dbStatusSlug !== 'en_attente') {
+                                            $statusSlug = $dbStatusSlug;
+                                            $statusName = $incident->status->name ?? $incident->status;
+                                            $statusClass = [
+                                                'en_cours' => 'bg-blue-100 text-blue-800',
+                                                'resolu' => 'bg-green-100 text-green-800',
+                                                'ferme' => 'bg-gray-100 text-gray-800'
+                                            ][$dbStatusSlug] ?? 'bg-gray-100 text-gray-800';
+                                        }
+                                    }
                                 @endphp
                                 <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }} shadow-sm">
                                     {{ ucwords(str_replace('_', ' ', $statusName)) }}
@@ -379,11 +397,16 @@
                         </div>
 
                         <!-- Comment Section -->
-                        <div id="comments-{{ $incident->id }}" class="hidden border-t bg-gray-50 p-4">
+                        <div id="comments-{{ $incident->id }}" 
+                             class="comment-section hidden border-t bg-gray-50 p-4"
+                             style="position: relative; z-index: 9999;">
                             <!-- Comment Input -->
-                            <div class="flex items-center mb-4">
-                                <input id="comment-input-{{ $incident->id }}" type="text" placeholder="Écrire un commentaire..." class="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
-                                <button onclick="sendComment({{ $incident->id }})" class="ml-2 text-pink-500 hover:text-pink-600">
+                            <div class="flex items-center mb-4" style="position: relative; z-index: 99999;">
+                                <input id="comment-input-{{ $incident->id }}" type="text" placeholder="Écrire un commentaire..." class="flex-1 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" style="position: relative; z-index: 99999;">
+                                <button type="button" 
+                                        onclick="event.stopPropagation(); event.preventDefault(); sendComment({{ $incident->id }});"
+                                        class="ml-2 text-pink-500 hover:text-pink-600"
+                                        style="position: relative; z-index: 999999; cursor: pointer;">
                                     <i class="far fa-paper-plane"></i>
                                 </button>
                             </div>
@@ -537,5 +560,22 @@
             });
         }
     </script>
+    <style>
+    @foreach($incidents as $incident)
+    #comments-{{ $incident->id }} {
+        position: relative;
+        z-index: 9999;
+    }
+    #comments-{{ $incident->id }} * {
+        position: relative;
+        pointer-events: auto !important;
+    }
+    #comments-{{ $incident->id }} button,
+    #comments-{{ $incident->id }} input {
+        position: relative !important;
+        z-index: 999999 !important;
+    }
+    @endforeach
+    </style>
 </body>
 </html>

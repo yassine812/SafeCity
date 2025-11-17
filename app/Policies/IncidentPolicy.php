@@ -21,7 +21,7 @@ class IncidentPolicy
      */
     public function view(User $user, Incident $incident): bool
     {
-        return $user->id === $incident->citizen_id;
+        return $user->id === $incident->user_id;
     }
 
     /**
@@ -37,7 +37,7 @@ class IncidentPolicy
      */
     public function update(User $user, Incident $incident): bool
     {
-        return $user->id === $incident->citizen_id && $incident->status !== 'resolved';
+        return $user->id === $incident->user_id && $incident->status !== 'resolved';
     }
 
     /**
@@ -45,7 +45,7 @@ class IncidentPolicy
      */
     public function delete(User $user, Incident $incident): bool
     {
-        return $user->id === $incident->citizen_id && $incident->status !== 'resolved';
+        return $user->id === $incident->user_id && $incident->status !== 'resolved';
     }
 
     /**

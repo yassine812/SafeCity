@@ -21,15 +21,24 @@
                     <div class="flex items-center">
                         <?php
                             $statusColors = [
+                                'nouveau' => 'bg-yellow-100 text-yellow-800',
                                 'En attente' => 'bg-yellow-100 text-yellow-800',
                                 'En cours' => 'bg-blue-100 text-blue-800',
                                 'Résolu' => 'bg-green-100 text-green-800',
                                 'Rejeté' => 'bg-red-100 text-red-800'
                             ];
-                            $statusColor = $statusColors[$incident->status->name] ?? 'bg-gray-100 text-gray-800';
+                            $statusDisplay = [
+                                'nouveau' => 'Nouveau',
+                                'En attente' => 'En attente',
+                                'En cours' => 'En cours',
+                                'Résolu' => 'Résolu',
+                                'Rejeté' => 'Rejeté'
+                            ];
+                            $statusColor = $statusColors[$incident->status] ?? 'bg-gray-100 text-gray-800';
+                            $statusText = $statusDisplay[$incident->status] ?? $incident->status;
                         ?>
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo e($statusColor); ?>">
-                            <?php echo e($incident->status->name); ?>
+                            <?php echo e($statusText); ?>
 
                         </span>
                         <span class="ml-2 text-sm text-gray-500">

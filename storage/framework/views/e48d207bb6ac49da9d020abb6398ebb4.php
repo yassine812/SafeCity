@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,24 +115,24 @@
             </div>
             
             <nav class="space-y-2">
-                <a href="{{ route('citizen.dashboard') }}" class="nav-link group">
+                <a href="<?php echo e(route('citizen.dashboard')); ?>" class="nav-link group">
                     <i class="fas fa-home text-pink-300 group-hover:text-white"></i>
                     Tableau de bord
                 </a>
-                <a href="{{ route('citizen.incidents.index') }}" class="nav-link group">
+                <a href="<?php echo e(route('citizen.incidents.index')); ?>" class="nav-link group">
                     <i class="fas fa-exclamation-triangle text-pink-300 group-hover:text-white"></i>
                     Mes signalements
                 </a>
-                <a href="{{ route('citizen.incidents.create') }}" class="nav-link group">
+                <a href="<?php echo e(route('citizen.incidents.create')); ?>" class="nav-link group">
                     <i class="fas fa-plus-circle text-pink-300 group-hover:text-white"></i>
                     Nouveau signalement
                 </a>
-                <a href="{{ route('profile.edit') }}" class="nav-link group">
+                <a href="<?php echo e(route('profile.edit')); ?>" class="nav-link group">
                     <i class="fas fa-user text-pink-300 group-hover:text-white"></i>
                     Mon profil
                 </a>
-                <form method="POST" action="{{ route('logout') }}" class="w-full">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('logout')); ?>" class="w-full">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="nav-link group w-full text-left">
                         <i class="fas fa-sign-out-alt text-pink-300 group-hover:text-white"></i>
                         Déconnexion
@@ -153,10 +153,10 @@
                 </div>
             </div>
 
-            <form action="{{ route('citizen.incidents.update', $incident) }}" 
+            <form action="<?php echo e(route('citizen.incidents.update', $incident)); ?>" 
                   method="POST" enctype="multipart/form-data" class="p-6">
-                @csrf
-                @method('PUT')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
 
                 <div class="space-y-6">
                     <!-- Category -->
@@ -167,12 +167,13 @@
 
                         <select name="category_id" id="category_id" required 
                             class="block w-full pl-4 pr-10 py-3 border rounded-lg">
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ $incident->category_id == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
+                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($category->id); ?>"
+                                    <?php echo e($incident->category_id == $category->id ? 'selected' : ''); ?>>
+                                    <?php echo e($category->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
 
@@ -180,7 +181,7 @@
                     <div class="space-y-2">
                         <label for="title" class="block text-sm font-medium">Titre *</label>
                         <input type="text" name="title" id="title"
-                            value="{{ $incident->title }}"
+                            value="<?php echo e($incident->title); ?>"
                             class="w-full px-4 py-3 border rounded-lg" required>
                     </div>
 
@@ -189,14 +190,14 @@
                         <label for="description" class="block text-sm font-medium">Description *</label>
                         <textarea name="description" id="description"
                             rows="4" required
-                            class="w-full px-4 py-3 border rounded-lg">{{ $incident->description }}</textarea>
+                            class="w-full px-4 py-3 border rounded-lg"><?php echo e($incident->description); ?></textarea>
                     </div>
 
                     <!-- City -->
                     <div class="space-y-2">
                         <label for="city" class="block text-sm font-medium">Ville *</label>
                         <input type="text" name="city" id="city"
-                            value="{{ $incident->city }}"
+                            value="<?php echo e($incident->city); ?>"
                             class="w-full px-4 py-3 border rounded-lg" required>
                     </div>
 
@@ -204,7 +205,7 @@
                     <div class="space-y-2">
                         <label for="address_line1" class="block text-sm font-medium">Adresse *</label>
                         <input type="text" name="address_line1" id="address_line1"
-                            value="{{ $incident->address_line1 }}"
+                            value="<?php echo e($incident->address_line1); ?>"
                             class="w-full px-4 py-3 border rounded-lg" required>
                     </div>
 
@@ -212,7 +213,7 @@
                     <div class="space-y-2">
                         <label for="postal_code" class="block text-sm font-medium">Code postal *</label>
                         <input type="text" name="postal_code" id="postal_code"
-                            value="{{ $incident->postal_code }}"
+                            value="<?php echo e($incident->postal_code); ?>"
                             class="w-full px-4 py-3 border rounded-lg" required>
                     </div>
 
@@ -237,31 +238,38 @@
                                 <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 5MB</p>
                             </div>
                         </div>
-                        @error('media')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <?php $__errorArgs = ['media'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Media Preview -->
                     <div id="media-preview" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        @foreach($incident->images as $image)
+                        <?php $__currentLoopData = $incident->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="relative group">
-                                <img src="{{ asset('storage/'.$image->path) }}" 
+                                <img src="<?php echo e(asset('storage/'.$image->path)); ?>" 
                                      class="w-full h-32 object-cover rounded-lg">
                                 <button type="button" 
                                         class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onclick="event.preventDefault(); document.getElementById('delete-image-{{ $image->id }}').submit();">
+                                        onclick="event.preventDefault(); document.getElementById('delete-image-<?php echo e($image->id); ?>').submit();">
                                     <i class="fas fa-times text-xs"></i>
                                 </button>
-                                <form id="delete-image-{{ $image->id }}" 
-                                      action="{{ route('incident-images.destroy', $image) }}" 
+                                <form id="delete-image-<?php echo e($image->id); ?>" 
+                                      action="<?php echo e(route('incident-images.destroy', $image)); ?>" 
                                       method="POST" 
                                       class="hidden">
-                                    @csrf
-                                    @method('DELETE')
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                 </form>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
                     <!-- Submit -->
@@ -314,7 +322,7 @@
     });
 </script>
 <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google.maps_api_key')); ?>&libraries=places&callback=initMap">
 </script>
 
 <style>
@@ -322,3 +330,4 @@
         z-index: 1100 !important;
     }
 </style>
+<?php /**PATH C:\Users\zerni\CascadeProjects\windsurf-project-8\SafeCity\resources\views/citizen/incidents/edit.blade.php ENDPATH**/ ?>
